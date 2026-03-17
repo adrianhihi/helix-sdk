@@ -28,7 +28,7 @@ function header(title: string): void {
 function iterLine(iter: number, source: string, delta: number, color: string): void {
   const num = String(iter).padStart(2, " ");
   const sign = delta >= 0 ? "+" : "";
-  const pct = `${sign}${delta.toFixed(2)}%`;
+  const pct = `TVL \u0394 ${sign}${delta.toFixed(2)}%`;
   console.log(`  ${color}✓ [iter ${num}]${RESET}  ${source.padEnd(16)} ${color}${pct}${RESET}`);
 }
 
@@ -39,6 +39,7 @@ function pcecLog(step: string, detail: string): void {
 // ── PART 1: Without Helix ────────────────────────────────────
 async function runWithoutHelix(): Promise<void> {
   header("PART 1: Without Helix");
+  console.log(`  ${DIM}Task: monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min${RESET}\n`);
 
   const scenario = new CryptoDataScenario(40);
   let completed = 0;
@@ -63,6 +64,7 @@ async function runWithoutHelix(): Promise<void> {
 // ── PART 2: With Helix ───────────────────────────────────────
 async function runWithHelix(): Promise<void> {
   header("PART 2: With Helix");
+  console.log(`  ${DIM}Task: monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min${RESET}\n`);
 
   const scenario = new CryptoDataScenario(40);
   const wrappedAgent = wrap(scenario.agent, { verbose: false });
@@ -121,14 +123,8 @@ async function runWithHelix(): Promise<void> {
   geneMap.close();
 
   console.log();
-  console.log(`${TEAL}╭──────────────────────────────────────────╮${RESET}`);
-  console.log(`${TEAL}│${BOLD}  Summary                                ${RESET}${TEAL}│${RESET}`);
-  console.log(`${TEAL}├──────────────────────────────────────────┤${RESET}`);
-  console.log(`${TEAL}│${RESET}  Iterations completed  ${GREEN}${BOLD}${String(completed).padStart(3)}${RESET} / ${scenario.totalIterations}         ${TEAL}│${RESET}`);
-  console.log(`${TEAL}│${RESET}  Human interventions   ${GREEN}${BOLD}  0${RESET}              ${TEAL}│${RESET}`);
-  console.log(`${TEAL}│${RESET}  Auto-repairs          ${AMBER}${BOLD}${String(repairs).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
-  console.log(`${TEAL}│${RESET}  Gene Map entries      ${TEAL}${BOLD}${String(stats.totalRepairs).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
-  console.log(`${TEAL}╰──────────────────────────────────────────╯${RESET}`);
+  console.log(`  ${GREEN}${BOLD}${completed}/${scenario.totalIterations} iterations${RESET} ${DIM}\u00B7${RESET} ${TEAL}8 hours monitored${RESET} ${DIM}\u00B7${RESET} ${GREEN}0 human interventions${RESET} ${DIM}\u00B7${RESET} ${AMBER}${repairs} auto-repairs${RESET}`);
+  console.log(`  ${DIM}Gene Map: ${stats.totalRepairs} entries stored${RESET}`);
 }
 
 // ── Show Map ─────────────────────────────────────────────────

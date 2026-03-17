@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz@12..96;wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root {
   --bg: #faf8f4;
@@ -84,14 +85,8 @@ body { background:var(--bg); font-family:var(--sans); color:var(--text); min-hei
   margin:0 auto;
   padding:48px 24px 60px;
   text-align:center;
-  opacity:0;
-  transform:translateY(16px);
-  transition:opacity 0.6s ease, transform 0.6s ease;
 }
-.hero-section.visible {
-  opacity:1;
-  transform:translateY(0);
-}
+.lucide { width:16px; height:16px; display:inline-block; vertical-align:-2px; }
 .hero-title {
   font-size:64px;
   font-weight:800;
@@ -153,11 +148,7 @@ body { background:var(--bg); font-family:var(--sans); color:var(--text); min-hei
   box-shadow:0 12px 40px rgba(0,0,0,0.08);
   border:1px solid #e5e0d8;
   overflow:hidden;
-  opacity:0;
-  transform:translateY(16px);
-  transition:opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
 }
-.code-wrap.visible { opacity:1; transform:translateY(0); }
 .code-chrome {
   display:flex;
   align-items:center;
@@ -221,15 +212,18 @@ body { background:var(--bg); font-family:var(--sans); color:var(--text); min-hei
     <div class="term-title">helix — self-repair demo</div>
   </div>
   <div class="term-body" id="terminal"></div>
+  <div style="text-align:center;padding:8px 0 12px">
+    <button id="replayBtn" onclick="runAnimation()" style="display:none;align-items:center;gap:5px;margin:0 auto;padding:6px 16px;border:1px solid #e5e0d8;border-radius:8px;background:rgba(255,255,255,0.6);font-family:var(--mono);font-size:11px;color:var(--text-dim);cursor:pointer;transition:all 0.2s"><i data-lucide="rotate-ccw" style="width:13px;height:13px"></i> Replay</button>
+  </div>
 </div>
 
 <div class="hero-section" id="heroSection">
   <div class="hero-title"><span>Helix</span></div>
   <div class="hero-sub">Two lines of code. Your agent never halts again.</div>
   <div class="hero-pills">
-    <a class="hero-pill" href="https://github.com/adrianhihi/helix-sdk" target="_blank">\uD83E\uDDEC github.com/adrianhihi/helix-sdk</a>
-    <a class="hero-pill primary" href="/dashboard">\u25B6 Live Demo \u2192</a>
-    <a class="hero-pill" href="https://arxiv.org/abs/2512.00417" target="_blank">\uD83D\uDCC4 CryptoBench \u00B7 arXiv:2512.00417</a>
+    <a class="hero-pill" href="https://github.com/adrianhihi/helix-sdk" target="_blank"><i data-lucide="github" class="lucide"></i> github.com/adrianhihi/helix-sdk</a>
+    <a class="hero-pill primary" href="/dashboard"><i data-lucide="play" class="lucide" style="color:#fff"></i> Live Demo <i data-lucide="arrow-right" class="lucide" style="width:14px;height:14px;color:#fff"></i></a>
+    <a class="hero-pill" href="https://arxiv.org/abs/2512.00417" target="_blank"><i data-lucide="file-text" class="lucide"></i> CryptoBench &middot; arXiv:2512.00417</a>
   </div>
 </div>
 
@@ -243,7 +237,7 @@ body { background:var(--bg); font-family:var(--sans); color:var(--text); min-hei
   <div class="code-body">
     <span class="cc">// Your existing agent, zero changes required</span><br>
     <span class="ck">const</span> <span class="cv">agent</span> = <span class="ck">async</span> (input) =&gt; { <span class="cc">/* ... */</span> }<br><br>
-    <span class="cc">// Add Helix \u2014 two lines</span><br>
+    <span class="cc">// Add Helix &mdash; two lines</span><br>
     <span class="cn">import { wrap } from '@helix/sdk'</span><br>
     <span class="cn">const resilientAgent = wrap(agent, { geneMarket: true })</span>
   </div>
@@ -265,13 +259,15 @@ var LINES = [
   { text: '\u2502  PART 1: Without Helix  \u2502', style: '', color: '#d97706' },
   { text: '\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F', style: '', color: '#d97706' },
   { text: '', style: '' },
-  { text: '  \u2713 [iter  1]  CoinGecko        +0.42%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  2]  Dune Analytics   -1.23%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  3]  Monad RPC        +0.87%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  4]  Alchemy          -0.34%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  5]  DefiLlama        +1.12%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  6]  CoinGecko        -0.56%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  7]  Monad RPC        +0.91%', style: '', color: '#16a34a' },
+  { text: '  Task: monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min', style: '', color: '#6b5535' },
+  { text: '', style: '' },
+  { text: '  \u2713 [iter  1]  CoinGecko        TVL \u0394 +0.42%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  2]  Dune Analytics   TVL \u0394 -1.23%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  3]  Monad RPC        TVL \u0394 +0.87%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  4]  Alchemy          TVL \u0394 -0.34%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  5]  DefiLlama        TVL \u0394 +1.12%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  6]  CoinGecko        TVL \u0394 -0.56%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  7]  Monad RPC        TVL \u0394 +0.91%', style: '', color: '#16a34a' },
   { text: '  \u2717 [iter  8]  CRASH: 429 Too Many Requests \u2014 CoinGecko', style: 'bold', color: '#dc2626' },
   { text: '', style: '' },
   { text: '  Agent stopped at iteration 8. Required: human intervention.', style: 'bold', color: '#dc2626' },
@@ -280,29 +276,32 @@ var LINES = [
   { text: '\u2502  PART 2: With Helix  \u2502', style: '', color: '#d97706' },
   { text: '\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F', style: '', color: '#d97706' },
   { text: '', style: '' },
-  { text: '  \u2713 [iter  1]  Alchemy          +0.52%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  2]  CoinGecko        +1.31%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  3]  DefiLlama        -0.18%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  4]  Monad RPC        +0.93%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  5]  Dune Analytics   -0.67%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  6]  CoinGecko        +1.44%', style: '', color: '#16a34a' },
-  { text: '  \u2713 [iter  7]  Alchemy          -0.22%', style: '', color: '#16a34a' },
+  { text: '  Task: monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min', style: '', color: '#6b5535' },
+  { text: '', style: '' },
+  { text: '  \u2713 [iter  1]  Alchemy          TVL \u0394 +0.52%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  2]  CoinGecko        TVL \u0394 +1.31%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  3]  DefiLlama        TVL \u0394 -0.18%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  4]  Monad RPC        TVL \u0394 +0.93%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  5]  Dune Analytics   TVL \u0394 -0.67%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  6]  CoinGecko        TVL \u0394 +1.44%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  7]  Alchemy          TVL \u0394 -0.22%', style: '', color: '#16a34a' },
   { text: '      \uD83D\uDD0D Perceive: RATE_LIMIT', style: '', color: '#d97706', delay: 600 },
   { text: '      \uD83D\uDD27 Construct: ["backoff_retry","rotate_api_key"]', style: '', color: '#d97706', delay: 400 },
   { text: '      \u2696\uFE0F  Evaluate: backoff_retry', style: '', color: '#d97706', delay: 400 },
   { text: '      \u2705 Commit: saved to gene map', style: '', color: '#16a34a', delay: 400 },
-  { text: '  \u2713 [iter  8]  DefiLlama        +0.74%   \u2190 repaired', style: '', color: '#d97706' },
-  { text: '  \u2713 [iter  9]  Monad RPC        +0.38%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  8]  DefiLlama        TVL \u0394 +0.74%   \u2190 repaired', style: '', color: '#d97706' },
+  { text: '  \u2713 [iter  9]  Monad RPC        TVL \u0394 +0.38%', style: '', color: '#16a34a' },
   { text: '  ...', style: '', color: '#6b5535' },
-  { text: '  \u2713 [iter 40]  CoinGecko        +1.22%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter 40]  CoinGecko        TVL \u0394 +1.22%', style: '', color: '#16a34a' },
   { text: '', style: '' },
-  { text: '  Iterations: 40/40  \u00B7  Human interventions: 0  \u00B7  Repairs: 4', style: 'bold', color: '#16a34a' },
+  { text: '  40/40 iterations \u00B7 8 hours monitored \u00B7 0 human interventions \u00B7 4 auto-repairs', style: 'bold', color: '#16a34a' },
 ];
 
 var terminal = document.getElementById('terminal');
-var heroSection = document.getElementById('heroSection');
-var codeWrap = document.getElementById('codeWrap');
 var animating = false;
+
+// Initialize Lucide icons
+lucide.createIcons();
 
 function createCursor() {
   var c = document.createElement('span');
@@ -352,22 +351,15 @@ function runAnimation() {
   if (animating) return;
   animating = true;
   terminal.innerHTML = '';
-  heroSection.classList.remove('visible');
-  codeWrap.classList.remove('visible');
+  document.getElementById('replayBtn').style.display = 'none';
 
   var lineIdx = 0;
   function nextLine() {
     if (lineIdx >= LINES.length) {
-      // Animation done — show hero
-      setTimeout(function() {
-        heroSection.classList.add('visible');
-        codeWrap.classList.add('visible');
-      }, 300);
-      // Loop after 3 seconds
-      setTimeout(function() {
-        animating = false;
-        runAnimation();
-      }, 6000);
+      animating = false;
+      var btn = document.getElementById('replayBtn');
+      btn.style.display = 'inline-flex';
+      lucide.createIcons({ nodes: [btn] });
       return;
     }
     var line = LINES[lineIdx];

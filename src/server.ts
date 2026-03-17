@@ -111,14 +111,14 @@ app.get("/api/helix/stream", async (req, res) => {
 
   // ── Part 1: Without Helix ──────────────────────────────────
   const scenario1 = new CryptoDataScenario(40);
-  send({ type: "part", part: 1, label: "Without Helix" });
+  send({ type: "part", part: 1, label: "Without Helix", task: "monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min" });
 
   let part1Completed = 0;
   for (let i = 1; i <= scenario1.totalIterations; i++) {
     if (clientDisconnected) break;
     try {
       const result = await scenario1.agent(i);
-      const delta = (result.tvlDelta >= 0 ? "+" : "") + result.tvlDelta.toFixed(2) + "%";
+      const delta = "TVL \u0394 " + (result.tvlDelta >= 0 ? "+" : "") + result.tvlDelta.toFixed(2) + "%";
       part1Completed++;
       send({ type: "iter", part: 1, iter: i, source: result.source, delta, status: "ok" });
     } catch (err) {
@@ -139,7 +139,7 @@ app.get("/api/helix/stream", async (req, res) => {
   if (clientDisconnected) { geneMap.close(); res.end(); return; }
 
   const scenario2 = new CryptoDataScenario(40);
-  send({ type: "part", part: 2, label: "With Helix" });
+  send({ type: "part", part: 2, label: "With Helix", task: "monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min" });
 
   const FAILURE_ITERS = new Set([8, 15, 23, 31]);
   let part2Completed = 0;
@@ -150,7 +150,7 @@ app.get("/api/helix/stream", async (req, res) => {
 
     try {
       const result = await scenario2.agent(i);
-      const delta = (result.tvlDelta >= 0 ? "+" : "") + result.tvlDelta.toFixed(2) + "%";
+      const delta = "TVL \u0394 " + (result.tvlDelta >= 0 ? "+" : "") + result.tvlDelta.toFixed(2) + "%";
       part2Completed++;
       send({ type: "iter", part: 2, iter: i, source: result.source, delta, status: "ok" });
     } catch (err) {
@@ -179,7 +179,7 @@ app.get("/api/helix/stream", async (req, res) => {
       // Retry — should succeed since failure only fires once
       try {
         const retryResult = await scenario2.agent(i);
-        const delta = (retryResult.tvlDelta >= 0 ? "+" : "") + retryResult.tvlDelta.toFixed(2) + "%";
+        const delta = "TVL \u0394 " + (retryResult.tvlDelta >= 0 ? "+" : "") + retryResult.tvlDelta.toFixed(2) + "%";
         part2Completed++;
         send({ type: "iter", part: 2, iter: i, source: retryResult.source, delta, status: "repaired" });
       } catch (retryErr) {
@@ -189,7 +189,7 @@ app.get("/api/helix/stream", async (req, res) => {
     await sleep(120);
   }
 
-  send({ type: "part_summary", part: 2, completed: part2Completed, total: scenario2.totalIterations, humanInterventions: 0, autoRepairs });
+  send({ type: "part_summary", part: 2, completed: part2Completed, total: scenario2.totalIterations, humanInterventions: 0, autoRepairs, summary: `${part2Completed}/${scenario2.totalIterations} iterations \u00B7 8 hours monitored \u00B7 0 human interventions \u00B7 ${autoRepairs} auto-repairs` });
 
   // Send gene map
   const repairs = geneMap.getRepairs();
