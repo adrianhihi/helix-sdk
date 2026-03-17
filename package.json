@@ -1,0 +1,23 @@
+{
+  "name": "@helix/sdk",
+  "version": "0.1.0",
+  "description": "Helix SDK — self-repairing agent wrapper with PCEC engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "demo": "ts-node demo.ts"
+  },
+  "bin": {
+    "helix-demo": "npx ts-node demo.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  }
+}
