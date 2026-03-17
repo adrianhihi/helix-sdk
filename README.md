@@ -57,7 +57,8 @@ npx ts-node demo.ts
 
 # Web dashboard — real-time visualization
 npm run server
-# open http://localhost:7842 → click "Run Demo"
+# open http://localhost:7842             # Live PCEC demo
+# open http://localhost:7842/scenarios   # 3 crypto scenarios
 
 # Inspect stored repairs
 npx ts-node demo.ts --show-map

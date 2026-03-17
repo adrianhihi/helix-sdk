@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LaoMOS SDK — 3 Crypto Scenarios</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#fdf7ed;--glass:rgba(255,255,255,.6);--sh:0 8px 32px rgba(180,83,9,.09);
+  --a:#d97706;--al:#f59e0b;--or:#ea580c;--ad:rgba(217,119,6,.1);
+  --r:#dc2626;--rd:rgba(220,38,38,.08);--g:#16a34a;--gd:rgba(22,163,74,.08);
+  --t:#0d9488;--bl:#1d4ed8;--pu:#7c3aed;
+  --tx:#1c1008;--t2:#6b5535;--mu:#a08050;
+  --br:rgba(217,119,6,.15);--br2:rgba(217,119,6,.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--tx);font-family:'Bricolage Grotesque',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 8% 4%,rgba(251,191,36,.2),transparent 55%),
+             radial-gradient(ellipse 60% 45% at 90% 90%,rgba(249,115,22,.13),transparent 55%);}
+.wrap{max-width:960px;margin:0 auto;padding:0 28px;}
+.fi{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;}
+.fi.vis{opacity:1;transform:translateY(0);}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;max-width:960px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
+.htag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--t);text-transform:uppercase;margin-bottom:28px;display:flex;align-items:center;gap:9px;opacity:0;animation:up .6s .1s ease forwards;}
+.htag::before{content:'';width:28px;height:1px;background:var(--t);opacity:.4;}
+.hero h1{font-size:clamp(40px,7vw,76px);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-bottom:20px;opacity:0;animation:up .6s .2s ease forwards;}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--al),var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hsub{font-size:17px;color:var(--t2);line-height:1.8;max-width:540px;margin-bottom:36px;opacity:0;animation:up .6s .35s ease forwards;}
+.hsub strong{color:var(--tx);font-weight:600;}
+.hpills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:40px;opacity:0;animation:up .6s .5s ease forwards;}
+.pill{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--br);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--t2);}
+.pdot{width:6px;height:6px;border-radius:50%;}
+.code-card{opacity:0;animation:up .7s .65s ease forwards;}
+.cwin{border-radius:14px;overflow:hidden;border:1px solid var(--br);box-shadow:var(--sh);}
+.cbar{padding:9px 16px;border-bottom:1px solid var(--br);background:rgba(255,255,255,.52);display:flex;align-items:center;gap:7px;}
+.cd{width:9px;height:9px;border-radius:50%;}.cdr{background:#ff5f57;}.cdy{background:#febc2e;}.cdg{background:#28c840;}
+.ctit{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);margin-left:5px;letter-spacing:.06em;}
+.cbody{padding:18px 22px;font-family:'DM Mono',monospace;font-size:12.5px;line-height:1.85;background:rgba(255,255,255,.45);}
+.cc{color:var(--mu);}.ck{color:var(--pu);}.cs{color:var(--g);}.cv{color:var(--bl);}
+.cn{color:var(--t);background:rgba(13,148,136,.09);border-radius:4px;padding:1px 7px;border:1px solid rgba(13,148,136,.18);}
+.scroll-hint{position:absolute;bottom:36px;left:28px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--mu);text-transform:uppercase;display:flex;align-items:center;gap:10px;opacity:0;animation:up .6s 1.4s ease forwards;}
+.scroll-hint::after{content:'';width:1px;height:36px;background:linear-gradient(180deg,var(--mu),transparent);}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+/* NAV */
+.snav{position:sticky;top:0;z-index:100;padding:11px 0;background:rgba(253,247,237,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--br);}
+.snav-in{max-width:960px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;}
+.snav-brand{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);letter-spacing:.12em;}
+.snav-pills{display:flex;gap:8px;}
+.sp2{padding:6px 14px;border-radius:20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;cursor:pointer;transition:all .2s;border:1px solid var(--br);background:transparent;color:var(--mu);}
+.sp2.active,.sp2:hover{background:var(--al);color:white;border-color:var(--al);}
+/* SHARED SECTION */
+.sec{padding:80px 0;position:relative;z-index:1;}
+.snum{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.snum::after{content:'';flex:1;height:1px;background:var(--br);}
+.stitle{font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-.025em;line-height:1.15;margin-bottom:12px;}
+.stitle em{font-style:normal;color:var(--a);}
+.sdesc{font-size:15px;color:var(--t2);line-height:1.8;max-width:620px;margin-bottom:28px;}
+.sdesc strong{color:var(--tx);font-weight:600;}
+.sdiv{height:1px;background:linear-gradient(90deg,transparent,var(--br),transparent);}
+/* CONTROLS */
+.ctrls{display:flex;align-items:center;gap:11px;margin-bottom:22px;flex-wrap:wrap;}
+.rbtn{padding:11px 26px;border-radius:11px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;background:linear-gradient(135deg,var(--al),var(--or));color:white;box-shadow:0 4px 14px rgba(217,119,6,.3);}
+.rbtn:hover{filter:brightness(1.08);transform:translateY(-2px);}
+.rbtn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none;box-shadow:none;}
+.xbtn{padding:11px 14px;border-radius:11px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--br);color:var(--mu);}
+.xbtn:hover{background:rgba(255,255,255,.8);color:var(--tx);}
+.spw{display:flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--br);border-radius:10px;padding:7px 12px;}
+.spw input{accent-color:var(--a);cursor:pointer;}
+/* RESULTS ROW */
+.res3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px;}
+.rc{padding:14px 16px;border-radius:14px;text-align:center;background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--br);box-shadow:var(--sh);}
+.rv{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1;margin-bottom:4px;}
+.rl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);line-height:1.5;}
+/* LOG LINES */
+.ll{display:flex;gap:7px;margin-bottom:1px;}
+.lt{color:var(--mu);flex-shrink:0;min-width:40px;font-size:9px;}
+.ltag{flex-shrink:0;font-size:7px;padding:1px 4px;border-radius:3px;text-transform:uppercase;letter-spacing:.07em;align-self:center;min-width:38px;text-align:center;}
+.tr{background:rgba(29,78,216,.1);color:var(--bl);border:1px solid rgba(29,78,216,.14);}
+.tf{background:rgba(220,38,38,.1);color:var(--r);border:1px solid rgba(220,38,38,.14);}
+.tx2{background:rgba(22,163,74,.1);color:var(--g);border:1px solid rgba(22,163,74,.14);}
+.tok{background:rgba(13,148,136,.1);color:var(--t);border:1px solid rgba(13,148,136,.14);}
+.th2{background:rgba(124,58,237,.1);color:var(--pu);border:1px solid rgba(124,58,237,.14);}
+.lm{color:rgba(28,16,8,.5);flex:1;font-size:9px;}
+.lr{color:var(--r);}.lg{color:var(--g);}.lp{color:var(--pu);}
+/* CRASH */
+.crash-ov{position:absolute;top:0;bottom:0;left:0;width:50%;border-radius:16px 0 0 16px;background:rgba(255,248,248,.93);backdrop-filter:blur(10px);border:1.5px solid rgba(220,38,38,.3);border-right:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:20;}
+.crash-ov.on{opacity:1;pointer-events:all;}
+.ci{font-size:30px;line-height:1;}.ct{font-size:16px;font-weight:800;color:var(--r);}
+.cr{font-family:'DM Mono',monospace;font-size:9px;color:rgba(220,38,38,.6);text-align:center;max-width:220px;}
+.cbtn{padding:9px 18px;border-radius:9px;background:var(--r);color:white;font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .2s;box-shadow:0 4px 12px rgba(220,38,38,.28);}
+.cbtn:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.cn2{font-family:'DM Mono',monospace;font-size:8px;color:rgba(220,38,38,.4);}
+.pulse{animation:pu 1s ease-in-out infinite;}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.2}}
+.bk{animation:bk 2s ease-in-out infinite;}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ═══ S1: LEFT LOG + RIGHT NODE GRAPH ═══ */
+.s1-layout{display:grid;grid-template-columns:1fr 300px;gap:14px;}
+.s1-pane{border-radius:16px;overflow:hidden;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--br);box-shadow:var(--sh);}
+.s1-split-hdr{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--br);}
+.s1-hdr-item{padding:11px 14px;display:flex;align-items:center;gap:8px;}
+.s1-hdr-item.wo{border-right:1px solid var(--br);background:rgba(220,38,38,.03);}
+.s1-hdr-item.wo.crashed{background:rgba(220,38,38,.12);}
+.s1-hdr-item.wl{background:rgba(22,163,74,.03);}
+.s1-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.s1-htitle{font-size:12px;font-weight:700;}
+.s1-hdr-item.wo .s1-icon{background:rgba(220,38,38,.1);}
+.s1-hdr-item.wo .s1-htitle{color:var(--r);}
+.s1-hdr-item.wl .s1-icon{background:rgba(22,163,74,.1);}
+.s1-hdr-item.wl .s1-htitle{color:var(--g);}
+.s1-running-badge{font-family:'DM Mono',monospace;font-size:8px;padding:2px 8px;border-radius:4px;background:rgba(22,163,74,.15);color:var(--g);letter-spacing:0.06em;text-transform:uppercase;margin-left:8px;display:none;}
+.s1-running-badge.on{display:inline-block;}
+.s1-mrow{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--br);}
+.s1-mc{padding:9px 10px;text-align:center;border-right:1px solid var(--br);}
+.s1-mc:last-child{border-right:none;}
+.s1-mc:nth-child(2){border-right:2px solid rgba(217,119,6,.25);}
+.s1-mv{font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1;margin-bottom:2px;transition:transform .2s;}
+.s1-mv.bump{transform:scale(1.2);}
+.s1-ml{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);}
+.s1-prog-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 12px 6px;border-bottom:1px solid var(--br);}
+.s1-prog-item .s1-pl{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-bottom:4px;}
+.s1-pt{height:4px;border-radius:2px;background:rgba(0,0,0,.06);overflow:hidden;}
+.s1-pf{height:100%;border-radius:2px;transition:width .3s;}
+.s1-pf.wo{background:linear-gradient(90deg,#f87171,var(--r));}
+.s1-pf.wl{background:linear-gradient(90deg,var(--t),var(--g));}
+.s1-halted-banner{background:var(--r);color:white;padding:12px 16px;border-radius:10px;font-weight:700;font-size:13px;text-align:center;margin:8px 12px;display:none;}
+.s1-halted-banner.on{display:block;animation:shake 0.4s ease;}
+.s1-terms{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--br);}
+.s1-term{height:190px;overflow-y:auto;padding:7px 10px;font-family:'DM Mono',monospace;font-size:9.5px;line-height:1.65;background:rgba(255,255,255,.25);}
+.s1-term:first-child{border-right:1px solid var(--br);}
+.s1-term.crashed-bg{background:rgba(220,38,38,0.08);}
+.s1-term.with-bg{background:rgba(22,163,74,0.05);}
+.s1-term::-webkit-scrollbar{width:2px;}
+.s1-term::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);}
+.s1-strow{display:grid;grid-template-columns:1fr 1fr;}
+.s1-st{padding:7px 12px;font-family:'DM Mono',monospace;font-size:9px;display:flex;align-items:center;gap:6px;color:var(--mu);}
+.s1-st:first-child{border-right:1px solid var(--br);}
+.sdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+/* Node graph */
+.s1-graph{border-radius:16px;overflow:hidden;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--br);box-shadow:var(--sh);position:relative;}
+.s1-gtitle{padding:11px 14px;border-bottom:1px solid var(--br);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);}
+.s1-nodes{padding:12px 14px;display:flex;flex-direction:column;gap:7px;}
+.s1-node{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.35);border:1px solid var(--br);transition:all .4s;}
+.s1-node.ok{border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.07);}
+.s1-node.fail{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.07);}
+.s1-node.fix{border-color:rgba(13,148,136,.3);background:rgba(13,148,136,.07);}
+.s1-node.idle{opacity:.45;}
+.s1-ni{font-size:14px;line-height:1;flex-shrink:0;}
+.s1-nn{font-size:10px;font-weight:600;flex:1;}
+.s1-ns{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);}
+.s1-node.ok .s1-ns{color:var(--g);}
+.s1-node.fail .s1-ns{color:var(--r);}
+.s1-node.fix .s1-ns{color:var(--t);}
+.s1-nc{font-family:'DM Mono',monospace;font-size:9px;min-width:24px;text-align:right;color:var(--mu);}
+
+/* ═══ S2: CARD GRID ═══ */
+.s2-top{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.s2-board{border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--br);box-shadow:var(--sh);padding:18px;}
+.s2-board-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:14px;}
+.s2-rows{display:flex;flex-direction:column;gap:10px;}
+.s2-row{display:flex;align-items:center;justify-content:space-between;}
+.s2-label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;}
+.s2-dot{width:8px;height:8px;border-radius:50%;}
+.s2-val{font-size:24px;font-weight:800;letter-spacing:-.02em;transition:transform .2s;}
+.s2-val.bump{transform:scale(1.2);}
+.s2-div{height:1px;background:var(--br);}
+.s2-pcec{border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(22,163,74,.2);box-shadow:var(--sh);padding:18px;display:flex;flex-direction:column;}
+.s2-ptitle{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(22,163,74,.6);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.pcdot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:bk 2s ease-in-out infinite;}
+.s2-plog{flex:1;overflow-y:auto;font-family:'DM Mono',monospace;font-size:9.5px;line-height:1.65;min-height:80px;}
+.s2-plog::-webkit-scrollbar{width:2px;}
+.s2-plog::-webkit-scrollbar-thumb{background:rgba(22,163,74,.2);}
+/* Project grid — dual layout */
+.s2-dual-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.s2-grid-panel{border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--br);box-shadow:var(--sh);padding:14px;position:relative;}
+.s2-grid-panel.without-panel{border-left:3px solid var(--r);background:rgba(254,226,226,0.12);}
+.s2-grid-panel.with-panel{border-left:3px solid var(--g);background:rgba(187,247,208,0.08);}
+.s2-grid-panel.frozen{opacity:0.85;}
+.s2-panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.s2-panel-title{font-size:12px;font-weight:700;}
+.s2-panel-title.red{color:var(--r);}
+.s2-panel-title.green{color:var(--g);}
+.s2-freeze-banner{background:var(--r);color:white;padding:10px 14px;border-radius:10px;font-weight:700;font-size:11px;text-align:center;margin-bottom:10px;display:none;}
+.s2-freeze-banner.on{display:block;animation:shake 0.4s ease;}
+.s2-big-counter{font-family:'DM Mono',monospace;font-size:48px;font-weight:800;text-align:center;line-height:1;margin:8px 0;}
+.s2-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.s2c{border-radius:10px;padding:9px 10px;border:1px solid var(--br);background:rgba(255,255,255,.3);transition:all .35s;min-height:68px;display:flex;flex-direction:column;justify-content:space-between;}
+.s2c.scanning{border-color:rgba(240,160,48,.4);background:rgba(240,160,48,.07);animation:sc .9s ease-in-out infinite;}
+@keyframes sc{0%,100%{opacity:1}50%{opacity:.65}}
+.s2c.done{border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.07);}
+.s2c.crashed{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.07);}
+.s2c.repaired{border-color:rgba(13,148,136,.3);background:rgba(13,148,136,.07);}
+.s2c.waiting{opacity:.38;}
+.s2cname{font-size:9.5px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.s2cscore{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--mu);}
+.s2c.done .s2cscore{color:var(--g);}
+.s2c.crashed .s2cscore{color:var(--r);}
+.s2c.repaired .s2cscore{color:var(--t);}
+.s2cbadge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.06em;padding:2px 5px;border-radius:3px;text-transform:uppercase;align-self:flex-start;}
+.s2c.scanning .s2cbadge{background:rgba(240,160,48,.15);color:var(--a);}
+.s2c.done .s2cbadge{background:rgba(22,163,74,.15);color:var(--g);}
+.s2c.crashed .s2cbadge{background:rgba(220,38,38,.15);color:var(--r);}
+.s2c.repaired .s2cbadge{background:rgba(13,148,136,.15);color:var(--t);}
+.s2c.waiting .s2cbadge{background:rgba(0,0,0,.05);color:var(--mu);}
+
+/* ═══ S3: DASHBOARD ═══ */
+.s3-top{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.s3-tm{padding:14px 16px;border-radius:14px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--br);box-shadow:var(--sh);text-align:center;}
+.s3-tv{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1;margin-bottom:4px;transition:transform .2s;}
+.s3-tv.bump{transform:scale(1.15);}
+.s3-tl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);}
+.s3-dual-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.s3-pool-panel{border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--br);box-shadow:var(--sh);padding:14px;}
+.s3-pool-panel.without-panel{border-left:3px solid var(--r);background:rgba(254,226,226,0.08);}
+.s3-pool-panel.with-panel{border-left:3px solid var(--g);background:rgba(187,247,208,0.06);}
+.s3-panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.s3-panel-title{font-size:12px;font-weight:700;}
+.s3-panel-title.red{color:var(--r);}
+.s3-panel-title.green{color:var(--g);}
+.s3-bad-counter{font-family:'DM Mono',monospace;font-size:48px;font-weight:800;text-align:center;line-height:1;margin:4px 0 8px;}
+.s3-pools{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.s3-pool{border-radius:13px;border:1px solid var(--br);background:var(--glass);backdrop-filter:blur(16px);padding:13px;transition:all .35s;position:relative;overflow:hidden;}
+.s3-pool::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 13px 13px;background:var(--br);transition:background .35s;}
+.s3-pool.healthy::after{background:var(--g);}
+.s3-pool.warn::after{background:var(--a);animation:wp 1s ease-in-out infinite;}
+@keyframes wp{0%,100%{opacity:1}50%{opacity:.3}}
+.s3-pool.crit::after{background:var(--r);}
+.s3-pool.fixed::after{background:var(--t);}
+.s3-pool.stale{border-color:rgba(220,38,38,0.4);background:rgba(220,38,38,0.1);}
+.s3-pool.stale::after{background:var(--r);}
+.s3-pool.stale .s3-pname{color:var(--r);}
+.s3-pool.stale .s3-pbadge{background:rgba(220,38,38,.15);color:var(--r);}
+.s3-pname{font-size:11px;font-weight:700;margin-bottom:6px;}
+.s3-pool.healthy .s3-pname{color:var(--g);}
+.s3-pool.warn .s3-pname{color:var(--a);}
+.s3-pool.crit .s3-pname{color:var(--r);}
+.s3-pool.fixed .s3-pname{color:var(--t);}
+.s3-pstats{display:flex;flex-direction:column;gap:3px;}
+.s3-ps{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:8px;}
+.s3-pk{color:var(--mu);}.s3-pv{font-weight:500;color:var(--tx);}
+.s3-pbadge{margin-top:6px;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.07em;text-transform:uppercase;padding:2px 6px;border-radius:3px;display:inline-block;}
+.s3-pool.healthy .s3-pbadge{background:rgba(22,163,74,.12);color:var(--g);}
+.s3-pool.warn .s3-pbadge{background:rgba(217,119,6,.12);color:var(--a);}
+.s3-pool.crit .s3-pbadge{background:rgba(220,38,38,.12);color:var(--r);}
+.s3-pool.fixed .s3-pbadge{background:rgba(13,148,136,.12);color:var(--t);}
+.s3-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.s3-logbox{border-radius:14px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--br);box-shadow:var(--sh);overflow:hidden;}
+.s3-lhdr{padding:9px 14px;border-bottom:1px solid var(--br);}
+.s3-ltitle{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);}
+.s3-log{height:175px;overflow-y:auto;padding:8px 12px;}
+.s3-log::-webkit-scrollbar{width:2px;}
+.s3-log::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);}
+.s3-sigbox{border-radius:14px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--br);box-shadow:var(--sh);overflow:hidden;}
+.s3-sighdr{padding:9px 14px;border-bottom:1px solid var(--br);}
+.s3-sigtitle{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);}
+.s3-siglist{height:175px;overflow-y:auto;padding:7px 12px;}
+.s3-siglist::-webkit-scrollbar{width:2px;}
+.s3-siglist::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);}
+.s3-sig{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid rgba(217,119,6,.06);}
+.s3-sig:last-child{border-bottom:none;}
+.s3-sigi{font-size:12px;flex-shrink:0;}
+.s3-sigpool{font-size:11px;font-weight:600;color:var(--tx);}
+.s3-sigdetail{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);}
+.s3-sig.blocked .s3-sigpool{color:var(--r);}
+.s3-sig.blocked .s3-sigdetail{color:rgba(220,38,38,.5);}
+.s3-sig.clean .s3-sigpool{color:var(--g);}
+/* SUMMARY */
+.summary{padding:80px 0 60px;position:relative;z-index:1;}
+.sum-hdr{text-align:center;margin-bottom:36px;}
+.sum-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--t);text-transform:uppercase;margin-bottom:10px;}
+.sum-h{font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-.025em;margin-bottom:12px;}
+.sum-h em{font-style:normal;color:var(--a);}
+.sum-sub{font-size:15px;color:var(--t2);max-width:480px;margin:0 auto 36px;}
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:36px;}
+.sc{padding:20px 18px;border-radius:16px;text-align:center;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--br);box-shadow:var(--sh);}
+.sv{font-size:36px;font-weight:800;letter-spacing:-.025em;line-height:1;margin-bottom:5px;}
+.sl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);line-height:1.6;}
+.pq{padding:22px 28px;border-left:3px solid var(--a);background:var(--ad);border-radius:0 12px 12px 0;margin:0 0 20px;}
+.pq p{font-size:17px;font-weight:600;font-style:italic;color:var(--tx);line-height:1.65;}
+.footnote{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);letter-spacing:.08em;text-align:center;}
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="htag">LaoMOS SDK · Three Crypto Scenarios</div>
+  <h1>Your agents.<br><em>Never halted.</em></h1>
+  <p class="hsub">VCs measure one metric: <strong>autonomous runtime</strong> — how long before a human intervenes. LaoMOS SDK extends it to infinity.</p>
+  <div class="hpills">
+    <div class="pill"><span class="pdot" style="background:var(--g)"></span>pip install laomos</div>
+    <div class="pill"><span class="pdot" style="background:var(--t)"></span>LangChain · CrewAI · any agent</div>
+    <div class="pill"><span class="pdot" style="background:var(--al)"></span>Gene Market · 4,700 capsules</div>
+  </div>
+  <div class="code-card">
+    <div class="cwin">
+      <div class="cbar"><div class="cd cdr"></div><div class="cd cdy"></div><div class="cd cdg"></div><span class="ctit">agent.py</span></div>
+      <div class="cbody">
+        <span class="cc"># Your existing agent, zero changes required</span><br>
+        <span class="ck">from</span> <span class="cv">langchain</span> <span class="ck">import</span> <span class="cv">Agent</span><br>
+        <span class="cv">agent</span> = <span class="cv">Agent</span>(model=<span class="cs">"gpt-4o"</span>, tools=[...])<br><br>
+        <span class="cc"># Add LaoMOS — PCEC self-repair + Gene Market immunity</span><br>
+        <span class="cn">from laomos import wrap</span><br>
+        <span class="cn">agent = wrap(agent, gene_market=True)</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll through 3 scenarios</div>
+</section>
+
+<div class="snav">
+  <div class="snav-in">
+    <div class="snav-brand">laomos/sdk</div>
+    <div class="snav-pills">
+      <div class="sp2 active" onclick="goTo('s1')">01 · Data Pipeline</div>
+      <div class="sp2" onclick="goTo('s2')">02 · Research Grid</div>
+      <div class="sp2" onclick="goTo('s3')">03 · Trading Dashboard</div>
+    </div>
+  </div>
+</div>
+
+<!-- S1: SPLIT LOG + NODE GRAPH -->
+<section class="sec fi" id="s1">
+  <div class="wrap">
+    <div class="snum">01 · On-chain Data Pipeline</div>
+    <h2 class="stitle">DeFi TVL monitor.<br><em>8 hours. Zero babysitting.</em></h2>
+    <p class="sdesc">A quant fund polls 12 DeFi protocols overnight. <strong>Rate limits, 503s, schema changes — something always breaks.</strong> The left pane shows what happens. The node graph on the right shows which sources fail.</p>
+    <div class="ctrls">
+      <div class="spw"><span>Speed</span><input type="range" id="s1sp" min="1" max="20" value="8" style="width:66px"><span id="s1spL">8x</span></div>
+      <button class="rbtn" id="s1run" onclick="startS1()">▶  Run Pipeline (8 hours)</button>
+      <button class="xbtn" onclick="resetS1()">↺</button>
+    </div>
+    <div class="s1-layout">
+      <div class="s1-pane" style="position:relative;">
+        <div class="s1-split-hdr">
+          <div class="s1-hdr-item wo" id="s1-hdr-wo"><div class="s1-icon">⚠️</div><div class="s1-htitle">Without LaoMOS</div></div>
+          <div class="s1-hdr-item wl"><div class="s1-icon">🧬</div><div class="s1-htitle">With LaoMOS</div><span class="s1-running-badge" id="s1-running-badge">✓ RUNNING</span></div>
+        </div>
+        <div class="s1-mrow">
+          <div class="s1-mc"><div class="s1-mv" id="s1-wo-c" style="color:var(--tx)">0</div><div class="s1-ml">calls</div></div>
+          <div class="s1-mc"><div class="s1-mv" id="s1-wo-h" style="color:var(--r)">0</div><div class="s1-ml">halts</div></div>
+          <div class="s1-mc"><div class="s1-mv" id="s1-w-c" style="color:var(--tx)">0</div><div class="s1-ml">calls</div></div>
+          <div class="s1-mc"><div class="s1-mv" id="s1-w-r" style="color:var(--g)">0</div><div class="s1-ml">repairs</div></div>
+        </div>
+        <div class="s1-prog-row">
+          <div class="s1-prog-item"><div class="s1-pl"><span id="s1-wo-pt">0 / 1,152</span></div><div class="s1-pt"><div class="s1-pf wo" id="s1-wo-pb" style="width:0%"></div></div></div>
+          <div class="s1-prog-item"><div class="s1-pl"><span id="s1-w-pt">0 / 1,152</span></div><div class="s1-pt"><div class="s1-pf wl" id="s1-w-pb" style="width:0%"></div></div></div>
+        </div>
+        <div class="s1-terms">
+          <div class="s1-term" id="s1-wo-log"></div>
+          <div class="s1-term" id="s1-w-log"></div>
+        </div>
+        <div class="s1-strow">
+          <div class="s1-st"><div class="sdot" id="s1-wo-dot" style="background:var(--mu)"></div><span id="s1-wo-st">Waiting</span></div>
+          <div class="s1-st"><div class="sdot" id="s1-w-dot" style="background:var(--mu)"></div><span id="s1-w-st">Waiting</span></div>
+        </div>
+        <div class="crash-ov" id="s1-crash" style="border-radius:16px;">
+          <div class="ci">🛑</div><div class="ct">Pipeline Halted</div>
+          <div class="cr" id="s1-cr">API failure</div>
+          <button class="cbtn" onclick="humanFixS1()">👤 Human Fix Required</button>
+          <div class="cn2" id="s1-cn">~20 min to diagnose</div>
+        </div>
+      </div>
+      <div class="s1-graph">
+        <div class="s1-gtitle">Live API source status</div>
+        <div class="s1-nodes">
+          <div class="s1-node idle" id="sn0"><div class="s1-ni">📊</div><div class="s1-nn">Dune Analytics</div><div class="s1-nc" id="sn0c">0</div><div class="s1-ns" id="sn0s">idle</div></div>
+          <div class="s1-node idle" id="sn1"><div class="s1-ni">🦎</div><div class="s1-nn">CoinGecko</div><div class="s1-nc" id="sn1c">0</div><div class="s1-ns" id="sn1s">idle</div></div>
+          <div class="s1-node idle" id="sn2"><div class="s1-ni">🦙</div><div class="s1-nn">DefiLlama</div><div class="s1-nc" id="sn2c">0</div><div class="s1-ns" id="sn2s">idle</div></div>
+          <div class="s1-node idle" id="sn3"><div class="s1-ni">⚗️</div><div class="s1-nn">Alchemy RPC</div><div class="s1-nc" id="sn3c">0</div><div class="s1-ns" id="sn3s">idle</div></div>
+          <div class="s1-node idle" id="sn4"><div class="s1-ni">🟣</div><div class="s1-nn">Monad RPC</div><div class="s1-nc" id="sn4c">0</div><div class="s1-ns" id="sn4s">idle</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="res3">
+      <div class="rc"><div class="rv" id="s1d1" style="color:var(--r)">—</div><div class="rl">Human interventions<br>without LaoMOS</div></div>
+      <div class="rc"><div class="rv" style="color:var(--g)">0</div><div class="rl">Human interventions<br>with LaoMOS</div></div>
+      <div class="rc"><div class="rv" id="s1d3" style="color:var(--a)">—</div><div class="rl">Time saved</div></div>
+    </div>
+  </div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S2: CARD GRID -->
+<section class="sec fi" id="s2">
+  <div class="wrap">
+    <div class="snum">02 · Crypto Research Agent</div>
+    <h2 class="stitle">Analyze 50 Monad projects.<br><em>Watch the grid fill up.</em></h2>
+    <p class="sdesc">A VC's agent analyzes every project in the Monad ecosystem. <strong>Each card is a project — watch them turn red and stall without LaoMOS, turn teal and recover with it.</strong></p>
+    <div class="ctrls">
+      <div class="spw"><span>Speed</span><input type="range" id="s2sp" min="1" max="20" value="8" style="width:66px"><span id="s2spL">8x</span></div>
+      <button class="rbtn" id="s2run" onclick="startS2()">▶  Analyze 50 Projects</button>
+      <button class="xbtn" onclick="resetS2()">↺</button>
+    </div>
+    <div class="s2-top">
+      <div class="s2-board">
+        <div class="s2-board-title">Research scoreboard</div>
+        <div class="s2-rows">
+          <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--g)"></div>Completed</div><div class="s2-val" id="s2done" style="color:var(--g)">0</div></div>
+          <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--r)"></div>Halted (w/o LaoMOS)</div><div class="s2-val" id="s2halted" style="color:var(--r)">0</div></div>
+          <div class="s2-div"></div>
+          <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--t)"></div>Auto-repaired</div><div class="s2-val" id="s2repaired" style="color:var(--t)">0</div></div>
+          <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--mu)"></div>Remaining</div><div class="s2-val" id="s2rem" style="color:var(--mu)">50</div></div>
+        </div>
+      </div>
+      <div class="s2-pcec">
+        <div class="s2-ptitle"><div class="pcdot"></div>PCEC repair log</div>
+        <div class="s2-plog" id="s2plog"><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu)">Waiting...</span></div>
+      </div>
+    </div>
+    <div class="s2-dual-layout">
+      <div class="s2-grid-panel without-panel" id="s2-wo-panel">
+        <div class="s2-panel-hdr">
+          <span class="s2-panel-title red">⚠️ Without Helix</span>
+        </div>
+        <div class="s2-freeze-banner" id="s2-freeze-banner">Research stopped. Projects unanalyzed.</div>
+        <div class="s2-big-counter" id="s2-wo-counter" style="color:var(--r)">0/50</div>
+        <div class="s2-grid" id="s2grid-wo"></div>
+      </div>
+      <div class="s2-grid-panel with-panel" id="s2-w-panel">
+        <div class="s2-panel-hdr">
+          <span class="s2-panel-title green">🧬 With Helix</span>
+        </div>
+        <div class="s2-big-counter" id="s2-w-counter" style="color:var(--g)">0/50</div>
+        <div class="s2-grid" id="s2grid-w"></div>
+      </div>
+    </div>
+    <div class="res3" style="margin-top:14px;">
+      <div class="rc"><div class="rv" id="s2d1" style="color:var(--r)">—</div><div class="rl">Projects abandoned<br>without LaoMOS</div></div>
+      <div class="rc"><div class="rv" style="color:var(--g)">50/50</div><div class="rl">Projects completed<br>with LaoMOS</div></div>
+      <div class="rc"><div class="rv" id="s2d3" style="color:var(--a)">—</div><div class="rl">Time wasted<br>on halts</div></div>
+    </div>
+  </div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S3: TRADING DASHBOARD -->
+<section class="sec fi" id="s3">
+  <div class="wrap">
+    <div class="snum">03 · Agentic Trading Monitor</div>
+    <h2 class="stitle">Yield pools. Real money.<br><em>Bad data = wrong trades.</em></h2>
+    <p class="sdesc">A DeFi protocol watches 4 pools, making autonomous rebalance decisions. <strong>Without LaoMOS, a silent oracle failure keeps the agent running on stale data — sending wrong signals to the execution layer.</strong></p>
+    <div class="ctrls">
+      <div class="spw"><span>Speed</span><input type="range" id="s3sp" min="1" max="20" value="8" style="width:66px"><span id="s3spL">8x</span></div>
+      <button class="rbtn" id="s3run" onclick="startS3()">▶  Start Monitor (6 hours)</button>
+      <button class="xbtn" onclick="resetS3()">↺</button>
+    </div>
+    <div class="s3-top">
+      <div class="s3-tm"><div class="s3-tv" id="s3checks" style="color:var(--tx)">0</div><div class="s3-tl">Pool checks</div></div>
+      <div class="s3-tm"><div class="s3-tv" id="s3signals" style="color:var(--g)">0</div><div class="s3-tl">Clean signals</div></div>
+      <div class="s3-tm"><div class="s3-tv" id="s3blocked" style="color:var(--t)">0</div><div class="s3-tl">Bad signals blocked</div></div>
+      <div class="s3-tm"><div class="s3-tv" id="s3repairs" style="color:var(--a)">0</div><div class="s3-tl">Auto-repairs</div></div>
+    </div>
+    <div class="s3-dual-layout">
+      <div class="s3-pool-panel without-panel">
+        <div class="s3-panel-hdr">
+          <span class="s3-panel-title red">⚠️ Without Helix</span>
+        </div>
+        <div class="s3-bad-counter" id="s3-wo-bad" style="color:var(--r)">0</div>
+        <div style="text-align:center;font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Bad signals sent</div>
+        <div class="s3-pools" id="s3-wo-pools">
+          <div class="s3-pool" id="pwo0"><div class="s3-pname">USDC/ETH</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pwo0a">4.2%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$12.4M</span></div></div><div class="s3-pbadge" id="pwo0b">waiting</div></div>
+          <div class="s3-pool" id="pwo1"><div class="s3-pname">WBTC/USDC</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pwo1a">2.8%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$28.1M</span></div></div><div class="s3-pbadge" id="pwo1b">waiting</div></div>
+          <div class="s3-pool" id="pwo2"><div class="s3-pname">MON/USDC</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pwo2a">18.7%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$4.2M</span></div></div><div class="s3-pbadge" id="pwo2b">waiting</div></div>
+          <div class="s3-pool" id="pwo3"><div class="s3-pname">stMON/MON</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pwo3a">7.1%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$9.7M</span></div></div><div class="s3-pbadge" id="pwo3b">waiting</div></div>
+        </div>
+      </div>
+      <div class="s3-pool-panel with-panel">
+        <div class="s3-panel-hdr">
+          <span class="s3-panel-title green">🧬 With Helix</span>
+        </div>
+        <div class="s3-bad-counter" id="s3-w-blocked" style="color:var(--g)">0</div>
+        <div style="text-align:center;font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Bad signals blocked</div>
+        <div class="s3-pools" id="s3-w-pools">
+          <div class="s3-pool" id="pw0"><div class="s3-pname">USDC/ETH</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pw0a">4.2%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$12.4M</span></div></div><div class="s3-pbadge" id="pw0b">waiting</div></div>
+          <div class="s3-pool" id="pw1"><div class="s3-pname">WBTC/USDC</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pw1a">2.8%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$28.1M</span></div></div><div class="s3-pbadge" id="pw1b">waiting</div></div>
+          <div class="s3-pool" id="pw2"><div class="s3-pname">MON/USDC</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pw2a">18.7%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$4.2M</span></div></div><div class="s3-pbadge" id="pw2b">waiting</div></div>
+          <div class="s3-pool" id="pw3"><div class="s3-pname">stMON/MON</div><div class="s3-pstats"><div class="s3-ps"><span class="s3-pk">APY</span><span class="s3-pv" id="pw3a">7.1%</span></div><div class="s3-ps"><span class="s3-pk">TVL</span><span class="s3-pv">$9.7M</span></div></div><div class="s3-pbadge" id="pw3b">waiting</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-bottom">
+      <div class="s3-logbox">
+        <div class="s3-lhdr"><div class="s3-ltitle">PCEC event log</div></div>
+        <div class="s3-log" id="s3log"></div>
+      </div>
+      <div class="s3-sigbox">
+        <div class="s3-sighdr"><div class="s3-sigtitle">Signal feed → execution layer</div></div>
+        <div class="s3-siglist" id="s3sigs"></div>
+      </div>
+    </div>
+    <div class="res3" style="margin-top:14px;">
+      <div class="rc"><div class="rv" id="s3d1" style="color:var(--r)">—</div><div class="rl">Critical failures<br>without LaoMOS</div></div>
+      <div class="rc"><div class="rv" style="color:var(--g)">0</div><div class="rl">Bad signals sent<br>with LaoMOS</div></div>
+      <div class="rc"><div class="rv" id="s3d3" style="color:var(--a)">—</div><div class="rl">Downtime prevented</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="summary fi">
+  <div class="wrap">
+    <div class="sum-hdr">
+      <div class="sum-tag">Across all 3 scenarios</div>
+      <h2 class="sum-h">One SDK. <em>Zero interventions.</em></h2>
+      <p class="sum-sub">Same agents. Same failures. Two lines of code changes everything.</p>
+    </div>
+    <div class="sum-grid">
+      <div class="sc"><div class="sv" style="color:var(--g)">0</div><div class="sl">Total human interventions<br>with LaoMOS SDK</div></div>
+      <div class="sc"><div class="sv" style="color:var(--a)">2</div><div class="sl">Lines of code<br>to integrate</div></div>
+      <div class="sc"><div class="sv" style="color:var(--t)">∞</div><div class="sl">Autonomous runtime<br>ceiling</div></div>
+    </div>
+    <div class="pq"><p>"One team's fix becomes every team's immunity. Gene Market compounds with every execution."</p></div>
+    <div class="footnote">laomos.com · @laomos/sdk · gene market phase 2 · CryptoBench arXiv:2512.00417</div>
+  </div>
+</section>
+
+<script>
+const fmt=ms=>{const m=Math.floor(ms/60000),h=Math.floor(m/60);return `${h}h ${m%60}m`;};
+const simT=ms=>{const b=new Date(2025,10,24,9,0);return new Date(b.getTime()+ms).toTimeString().slice(0,5);};
+function bmp(id){const el=document.getElementById(id);if(!el)return;el.classList.add('bump');setTimeout(()=>el.classList.remove('bump'),250);}
+
+// ── S1 ──
+const S1F=[
+  {t:'HTTP_503',m:'Dune Analytics 503',p:'switched to DefiLlama fallback',ni:0},
+  {t:'RATE_LIMIT',m:'CoinGecko 429 rate limit',p:'distributed across 3 keys',ni:1},
+  {t:'RPC_ROTATE',m:'Alchemy RPC endpoint rotated',p:'detected via DNS, updated',ni:3},
+  {t:'SCHEMA_DRIFT',m:'DefiLlama tvl→tvlUsd change',p:'remapped via Gene Capsule #4712',ni:2},
+];
+const S1CP=[187,421,698,944];
+let s1={run:false,woIv:null,wIv:null,ci:0,wo:{c:0,h:0,ms:0,cr:false,done:false},w:{c:0,r:0,ms:0,done:false}};
+const MS1=25000,HM1=20*60*1000;
+const NC=[0,0,0,0,0];
+function s1sp(){return parseInt(document.getElementById('s1sp').value);}
+function s1tk(){return Math.max(14,340/s1sp());}
+function lg1(p,t,tag,tc,msg,mc=''){const el=document.getElementById(`s1-${p}-log`);el.innerHTML+=`<div class="ll"><span class="lt">${t}</span><span class="ltag ${tc}">${tag}</span><span class="lm ${mc}">${msg}</span></div>`;el.scrollTop=el.scrollHeight;}
+function setSt1(p,msg,col){document.getElementById(`s1-${p}-st`).textContent=msg;document.getElementById(`s1-${p}-dot`).style.background=col;}
+function setNode(i,cls,st){const el=document.getElementById('sn'+i);if(!el)return;el.className='s1-node '+cls;document.getElementById('sn'+i+'s').textContent=st;NC[i]++;document.getElementById('sn'+i+'c').textContent=NC[i];}
+function tickS1wo(){
+  if(s1.wo.done||s1.wo.cr)return;
+  s1.wo.c++;s1.wo.ms+=MS1;const t=simT(s1.wo.ms);
+  if(s1.wo.c%4===0)lg1('wo',t,'RUN','tr',`Batch #${Math.ceil(s1.wo.c/12)}`);
+  if(s1.ci<S1CP.length&&s1.wo.c>=S1CP[s1.ci]){
+    const f=S1F[s1.ci%S1F.length];
+    lg1('wo',t,'FAIL','tf',f.t+': '+f.m,'lr');lg1('wo',t,'FAIL','tf','Pipeline halted','lr');
+    s1.wo.cr=true;s1.wo.h++;
+    document.getElementById('s1-cr').textContent=f.t+' · '+f.m;
+    document.getElementById('s1-cn').textContent='~20 min to fix · halt #'+s1.wo.h;
+    document.getElementById('s1-crash').classList.add('on');
+    document.getElementById('s1-wo-log').classList.add('crashed-bg');
+    document.getElementById('s1-hdr-wo').classList.add('crashed');
+    setSt1('wo','⚠ Halted','var(--r)');bmp('s1-wo-h');
+  }
+  if(s1.wo.c>=1152){s1.wo.done=true;clearInterval(s1.woIv);setSt1('wo',s1.wo.h+' halts','var(--r)');finS1();return;}
+  document.getElementById('s1-wo-c').textContent=s1.wo.c;document.getElementById('s1-wo-h').textContent=s1.wo.h;
+  document.getElementById('s1-wo-pt').textContent=s1.wo.c+' / 1,152';
+  document.getElementById('s1-wo-pb').style.width=(s1.wo.c/1152*100)+'%';
+}
+function humanFixS1(){
+  if(!s1.wo.cr)return;
+  const f=S1F[s1.ci%S1F.length];s1.wo.ms+=HM1;s1.ci++;
+  document.getElementById('s1-crash').classList.remove('on');
+  document.getElementById('s1-wo-log').classList.remove('crashed-bg');
+  document.getElementById('s1-hdr-wo').classList.remove('crashed');
+  lg1('wo',simT(s1.wo.ms),'HUMAN','th2','Human fixed — resuming','lp');
+  s1.wo.cr=false;setSt1('wo','Running...','var(--r)');
+}
+function tickS1w(){
+  if(s1.w.done)return;
+  s1.w.c++;s1.w.ms+=MS1;const t=simT(s1.w.ms);
+  const ni=s1.w.c%5;setNode(ni,'ok','polling');
+  if(s1.w.c%4===0)lg1('w',t,'RUN','tr',`Batch #${Math.ceil(s1.w.c/12)}`);
+  if(S1CP.includes(s1.w.c)){
+    const fi=S1CP.indexOf(s1.w.c);const f=S1F[fi%S1F.length];s1.w.r++;
+    lg1('w',t,'FAIL','tf',f.t,'lr');lg1('w',t,'FIX','tx2','PCEC → '+f.p,'lg');
+    setNode(f.ni,'fix','PCEC repair');
+    setTimeout(()=>setNode(f.ni,'ok','restored'),s1tk()*4);bmp('s1-w-r');
+  }
+  if(s1.w.c>=1152){s1.w.done=true;clearInterval(s1.wIv);setSt1('w','✓ 0 halts · '+s1.w.r+' repairs','var(--g)');finS1();return;}
+  document.getElementById('s1-w-c').textContent=s1.w.c;document.getElementById('s1-w-r').textContent=s1.w.r;
+  document.getElementById('s1-w-pt').textContent=s1.w.c+' / 1,152';
+  document.getElementById('s1-w-pb').style.width=(s1.w.c/1152*100)+'%';
+}
+function finS1(){if(!s1.w.done)return;document.getElementById('s1d1').textContent=s1.wo.h;document.getElementById('s1d3').textContent=fmt(s1.wo.h*HM1)+' saved';}
+function startS1(){
+  if(s1.run)return;s1.run=true;document.getElementById('s1run').disabled=true;
+  setSt1('wo','Running...','var(--r)');setSt1('w','Running...','var(--g)');
+  document.getElementById('s1-wo-dot').classList.add('pulse');document.getElementById('s1-w-dot').classList.add('pulse');
+  document.getElementById('s1-running-badge').classList.add('on');
+  document.getElementById('s1-w-log').classList.add('with-bg');
+  for(let i=0;i<5;i++)setNode(i,'ok','polling');
+  lg1('wo','09:00','RUN','tr','Pipeline started · 12 protocols · 8h schedule');
+  lg1('w','09:00','RUN','tr','LaoMOS SDK active');
+  lg1('w','09:00','OK','tok','Gene Market: failover configs loaded','lg');
+  s1.woIv=setInterval(tickS1wo,s1tk());s1.wIv=setInterval(tickS1w,s1tk());
+  document.getElementById('s1sp').addEventListener('input',function(){document.getElementById('s1spL').textContent=this.value+'x';if(s1.run){clearInterval(s1.woIv);clearInterval(s1.wIv);s1.woIv=setInterval(tickS1wo,s1tk());s1.wIv=setInterval(tickS1w,s1tk());}});
+}
+function resetS1(){
+  s1.run=false;s1.ci=0;clearInterval(s1.woIv);clearInterval(s1.wIv);
+  s1.wo={c:0,h:0,ms:0,cr:false,done:false};s1.w={c:0,r:0,ms:0,done:false};
+  for(let i=0;i<5;i++){NC[i]=0;setNode(i,'idle','idle');document.getElementById('sn'+i+'c').textContent='0';}
+  ['s1-wo-c','s1-wo-h','s1-w-c','s1-w-r'].forEach(id=>document.getElementById(id).textContent='0');
+  ['s1-wo-log','s1-w-log'].forEach(id=>document.getElementById(id).innerHTML='');
+  document.getElementById('s1-crash').classList.remove('on');
+  document.getElementById('s1-running-badge').classList.remove('on');
+  document.getElementById('s1-wo-log').classList.remove('crashed-bg');
+  document.getElementById('s1-w-log').classList.remove('with-bg');
+  document.getElementById('s1-hdr-wo').classList.remove('crashed');
+  ['s1-wo-pb','s1-w-pb'].forEach(id=>document.getElementById(id).style.width='0%');
+  ['s1-wo-pt','s1-w-pt'].forEach(id=>document.getElementById(id).textContent='0 / 1,152');
+  setSt1('wo','Waiting','var(--mu)');setSt1('w','Waiting','var(--mu)');
+  ['s1-wo-dot','s1-w-dot'].forEach(id=>{const el=document.getElementById(id);el.classList.remove('pulse');el.style.background='var(--mu)';});
+  ['s1d1','s1d3'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('s1run').disabled=false;
+}
+
+// ── S2 ──
+const PROJECTS=['Kinto','Curvance','Ambient Fi','Apriori','Shmonad','Narwhal Fi','Groundup','Kinza Fi','Monad NS','Nad.fun','Curio','Talus','Kona','Monad Pad','Virtuals','Nansen AI','Pendle','Euler','Morpho','Uniswap V4','Balancer V3','Curve','Aave V4','Compound','MakerDAO','Lido','Rocket Pool','EigenLayer','Symbiotic','Veda','Mitosis','Bebop','Odos','Socket','Hop','Across','Stargate','LayerZero','Wormhole','Axelar','deBridge','Connext','Celer','Synapse','Rubic','1inch v6','Paraswap','Kyber','DODO','Hashflow'];
+const S2F=[
+  {t:'ABI_DRIFT',m:'Token ABI changed — parser failed',p:'re-inferred ABI from bytecode'},
+  {t:'CTX_OVERFLOW',m:'Context overflow on tokenomics',p:'chunked into 3 sub-analyses'},
+  {t:'AUTH_EXPIRE',m:'GitHub token expired mid-scrape',p:'rotated to secondary (capsule #388)'},
+];
+const S2CP=[11,27,39];
+let s2={run:false,woIv:null,wIv:null,ci:0,wo:{c:0,h:0,ms:0,cr:false,done:false,hl:[]},w:{c:0,r:0,ms:0,done:false}};
+const MS2=5*60*1000,HM2=30*60*1000;
+function s2sp(){return parseInt(document.getElementById('s2sp').value);}
+function s2tk(){return Math.max(14,340/s2sp());}
+function buildGrid(){
+  const gwo=document.getElementById('s2grid-wo');
+  const gw=document.getElementById('s2grid-w');
+  gwo.innerHTML='';gw.innerHTML='';
+  PROJECTS.forEach((p,i)=>{
+    const card=`<div class="s2c waiting" id="s2c-wo-${i}"><div class="s2cname">${p}</div><div class="s2cscore" id="s2c-wo-${i}sc">—</div><div class="s2cbadge" id="s2c-wo-${i}b">queued</div></div>`;
+    gwo.innerHTML+=card;
+    const card2=`<div class="s2c waiting" id="s2c-w-${i}"><div class="s2cname">${p}</div><div class="s2cscore" id="s2c-w-${i}sc">—</div><div class="s2cbadge" id="s2c-w-${i}b">queued</div></div>`;
+    gw.innerHTML+=card2;
+  });
+}
+function setCard(prefix,i,cls,sc,b){
+  const el=document.getElementById('s2c-'+prefix+'-'+i);
+  if(!el)return;
+  el.className='s2c '+cls;
+  document.getElementById('s2c-'+prefix+'-'+i+'sc').textContent=sc;
+  document.getElementById('s2c-'+prefix+'-'+i+'b').textContent=b;
+}
+function pcLog(msg,mc=''){const el=document.getElementById('s2plog');el.innerHTML+=`<div class="lm ${mc}" style="font-family:'DM Mono',monospace;font-size:9px;margin-bottom:2px">${msg}</div>`;el.scrollTop=el.scrollHeight;}
+function tickS2wo(){
+  if(s2.wo.done||s2.wo.cr)return;
+  s2.wo.c++;s2.wo.ms+=MS2;
+  setCard('wo',s2.wo.c-1,'scanning','analyzing...','scanning');
+  if(s2.ci<S2CP.length&&s2.wo.c>=S2CP[s2.ci]){
+    const f=S2F[s2.ci%S2F.length];
+    setCard('wo',s2.wo.c-1,'crashed','failed',f.t);
+    s2.wo.h++;s2.wo.hl.push(s2.wo.c-1);
+    document.getElementById('s2halted').textContent=s2.wo.h;bmp('s2halted');
+    document.getElementById('s2-freeze-banner').textContent='Research stopped at project '+(s2.wo.c)+'. '+(50-s2.wo.c)+' projects unanalyzed.';
+    document.getElementById('s2-freeze-banner').classList.add('on');
+    document.getElementById('s2-wo-panel').classList.add('frozen');
+    s2.wo.done=true;clearInterval(s2.woIv);
+    s2.ci++;
+  }else{
+    setTimeout(()=>{const sc=(Math.random()*.4+.55).toFixed(2);setCard('wo',s2.wo.c-1,'done',sc+'/1.0','done ✓');document.getElementById('s2done').textContent=s2.wo.c-s2.wo.h;bmp('s2done');},s2tk()*2);
+  }
+  document.getElementById('s2rem').textContent=50-s2.wo.c;
+  document.getElementById('s2-wo-counter').textContent=s2.wo.c+'/50';
+  if(s2.wo.c>=50){s2.wo.done=true;clearInterval(s2.woIv);finS2();return;}
+}
+function tickS2w(){
+  if(s2.w.done)return;
+  s2.w.c++;s2.w.ms+=MS2;
+  if(S2CP.includes(s2.w.c)){
+    const fi=S2CP.indexOf(s2.w.c);const f=S2F[fi%S2F.length];s2.w.r++;
+    pcLog('FAIL: '+f.t,'lr');pcLog('PCEC → '+f.p,'lg');
+    pcLog('Capsule #'+(4700+s2.w.r)+' → network','lg');
+    document.getElementById('s2repaired').textContent=s2.w.r;bmp('s2repaired');
+    setTimeout(()=>{const sc=(Math.random()*.4+.55).toFixed(2);setCard('w',s2.w.c-1,'repaired',sc+'/1.0','repaired ✓');},s2tk());
+  }else{
+    setTimeout(()=>{const sc=(Math.random()*.4+.55).toFixed(2);setCard('w',s2.w.c-1,'done',sc+'/1.0','done ✓');},s2tk());
+  }
+  document.getElementById('s2-w-counter').textContent=s2.w.c+'/50';
+  if(s2.w.c>=50){s2.w.done=true;clearInterval(s2.wIv);finS2();return;}
+}
+function finS2(){if(!s2.w.done)return;document.getElementById('s2d1').textContent=s2.wo.hl.length+'/50';document.getElementById('s2d3').textContent=fmt(s2.wo.h*HM2);}
+function startS2(){
+  if(s2.run)return;s2.run=true;buildGrid();document.getElementById('s2run').disabled=true;
+  document.getElementById('s2plog').innerHTML='';
+  pcLog('PCEC active · schema drift detection on','lg');pcLog('Gene Market: ABI library loaded','lg');
+  s2.woIv=setInterval(tickS2wo,s2tk());s2.wIv=setInterval(tickS2w,s2tk());
+  document.getElementById('s2sp').addEventListener('input',function(){document.getElementById('s2spL').textContent=this.value+'x';if(s2.run){clearInterval(s2.woIv);clearInterval(s2.wIv);s2.woIv=setInterval(tickS2wo,s2tk());s2.wIv=setInterval(tickS2w,s2tk());}});
+}
+function resetS2(){
+  s2.run=false;s2.ci=0;clearInterval(s2.woIv);clearInterval(s2.wIv);
+  s2.wo={c:0,h:0,ms:0,cr:false,done:false,hl:[]};s2.w={c:0,r:0,ms:0,done:false};
+  buildGrid();
+  document.getElementById('s2-freeze-banner').classList.remove('on');
+  document.getElementById('s2-wo-panel').classList.remove('frozen');
+  document.getElementById('s2-wo-counter').textContent='0/50';
+  document.getElementById('s2-w-counter').textContent='0/50';
+  ['s2done','s2halted','s2repaired'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('s2rem').textContent='50';
+  document.getElementById('s2plog').innerHTML='<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--mu)">Waiting...</span>';
+  ['s2d1','s2d3'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('s2run').disabled=false;
+}
+
+// ── S3 ──
+const S3F=[
+  {t:'ORACLE_STALE',m:'Price oracle >5min stale',p:'switched to backup oracle',pi:2},
+  {t:'WS_DROP',m:'Mempool WebSocket dropped',p:'reconnected via fallback RPC',pi:1},
+  {t:'RPC_TIMEOUT',m:'Monad RPC getLogs timeout',p:'backoff + alt node',pi:0},
+  {t:'POOL_OFFLINE',m:'Pool contract returned 0x',p:'pool paused, excluded',pi:3},
+];
+const S3CP=[24,67,113,156];
+const PAPYS=['4.2','2.8','18.7','7.1'];
+const PNAMES=['USDC/ETH','WBTC/USDC','MON/USDC','stMON/MON'];
+let s3={run:false,iv:null,c:0,r:0,sigs:0,blocked:0,woBad:0,ms:0,done:false,ci:0,staleWo:{}};
+const MS3=30000;
+function s3sp(){return parseInt(document.getElementById('s3sp').value);}
+function s3tk(){return Math.max(14,340/s3sp());}
+function lg3(t,tag,tc,msg,mc=''){const el=document.getElementById('s3log');el.innerHTML+=`<div class="ll"><span class="lt">${t}</span><span class="ltag ${tc}">${tag}</span><span class="lm ${mc}">${msg}</span></div>`;el.scrollTop=el.scrollHeight;}
+function addSig(pool,type,detail){const el=document.getElementById('s3sigs');const cls=type==='blocked'?'blocked':'clean';const icon=type==='blocked'?'🚫':'✅';el.innerHTML=`<div class="s3-sig ${cls}"><div class="s3-sigi">${icon}</div><div><div class="s3-sigpool">${pool}</div><div class="s3-sigdetail">${detail}</div></div></div>`+el.innerHTML;}
+function setPoolWo(i,cls,badge){
+  const el=document.getElementById('pwo'+i);if(!el)return;
+  el.className='s3-pool '+cls;
+  document.getElementById('pwo'+i+'b').textContent=badge;
+  const d=(Math.random()*.3-.15).toFixed(1);
+  document.getElementById('pwo'+i+'a').textContent=(parseFloat(PAPYS[i])+parseFloat(d)).toFixed(1)+'%';
+}
+function setPoolW(i,cls,badge){
+  const el=document.getElementById('pw'+i);if(!el)return;
+  el.className='s3-pool '+cls;
+  document.getElementById('pw'+i+'b').textContent=badge;
+  const d=(Math.random()*.3-.15).toFixed(1);
+  document.getElementById('pw'+i+'a').textContent=(parseFloat(PAPYS[i])+parseFloat(d)).toFixed(1)+'%';
+}
+function tickS3(){
+  if(s3.done)return;
+  s3.c++;s3.ms+=MS3;const t=simT(s3.ms);
+  const pi=s3.c%4;
+  // Update both sides for normal pools
+  if(!s3.staleWo[pi]){
+    setPoolWo(pi,'healthy','healthy');
+  }
+  setPoolW(pi,'healthy','healthy');
+  if(s3.c%7===0){s3.sigs++;addSig(PNAMES[pi],'clean',`hold · yield ${(3+Math.random()*15).toFixed(1)}%`);document.getElementById('s3signals').textContent=s3.sigs;bmp('s3signals');}
+  if(s3.c%11===0)lg3(t,'RUN','tr','Scan #'+s3.c+' — all pools responding');
+  if(S3CP.includes(s3.c)){
+    const fi=S3CP.indexOf(s3.c);const f=S3F[fi%S3F.length];s3.r++;
+    // WITHOUT side: pool goes stale permanently, bad signal sent
+    setPoolWo(f.pi,'stale','STALE DATA');
+    s3.staleWo[f.pi]=true;
+    s3.woBad++;
+    document.getElementById('s3-wo-bad').textContent=s3.woBad;
+    // WITH side: detect, warn, then fix
+    setPoolW(f.pi,'warn','⚠ anomaly');
+    lg3(t,'FAIL','tf',f.t+': '+f.m,'lr');lg3(t,'FIX','tx2','PCEC → '+f.p,'lg');
+    s3.blocked++;addSig(PNAMES[f.pi],'blocked','signal BLOCKED · stale data · PCEC repaired');
+    document.getElementById('s3blocked').textContent=s3.blocked;bmp('s3blocked');
+    document.getElementById('s3repairs').textContent=s3.r;bmp('s3repairs');
+    document.getElementById('s3-w-blocked').textContent=s3.blocked;
+    setTimeout(()=>setPoolW(f.pi,'fixed','repaired ✓'),s3tk()*3);
+    setTimeout(()=>setPoolW(f.pi,'healthy','healthy'),s3tk()*8);
+  }
+  document.getElementById('s3checks').textContent=s3.c;
+  if(s3.c>=180){
+    s3.done=true;clearInterval(s3.iv);
+    lg3(t,'OK','tok','6h complete. Zero bad signals to execution layer. ✓','lg');
+    document.getElementById('s3d1').textContent=S3CP.length;
+    document.getElementById('s3d3').textContent=Math.round(S3CP.length*45)+'min saved';
+  }
+}
+function startS3(){
+  if(s3.run)return;s3.run=true;document.getElementById('s3run').disabled=true;
+  for(let i=0;i<4;i++){setPoolWo(i,'healthy','monitoring');setPoolW(i,'healthy','monitoring');}
+  lg3('09:00','RUN','tr','Monitor initialized · watching 4 pools');
+  lg3('09:00','OK','tok','PCEC: oracle freshness checks active','lg');
+  s3.iv=setInterval(tickS3,s3tk());
+  document.getElementById('s3sp').addEventListener('input',function(){document.getElementById('s3spL').textContent=this.value+'x';if(s3.run){clearInterval(s3.iv);s3.iv=setInterval(tickS3,s3tk());}});
+}
+function resetS3(){
+  s3.run=false;clearInterval(s3.iv);
+  s3={run:false,iv:null,c:0,r:0,sigs:0,blocked:0,woBad:0,ms:0,done:false,ci:0,staleWo:{}};
+  for(let i=0;i<4;i++){
+    const elWo=document.getElementById('pwo'+i);if(elWo)elWo.className='s3-pool';
+    const bWo=document.getElementById('pwo'+i+'b');if(bWo)bWo.textContent='waiting';
+    const elW=document.getElementById('pw'+i);if(elW)elW.className='s3-pool';
+    const bW=document.getElementById('pw'+i+'b');if(bW)bW.textContent='waiting';
+  }
+  document.getElementById('s3-wo-bad').textContent='0';
+  document.getElementById('s3-w-blocked').textContent='0';
+  ['s3checks','s3signals','s3blocked','s3repairs'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('s3log').innerHTML='';document.getElementById('s3sigs').innerHTML='';
+  ['s3d1','s3d3'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('s3run').disabled=false;
+}
+
+// NAV
+function goTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});}
+const navPs=document.querySelectorAll('.sp2');
+const secs=['s1','s2','s3'].map(id=>document.getElementById(id));
+window.addEventListener('scroll',()=>{let c=0;secs.forEach((s,i)=>{if(s&&window.scrollY>=s.offsetTop-180)c=i;});navPs.forEach((p,i)=>p.classList.toggle('active',i===c));});
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('vis');});},{threshold:.07});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+buildGrid();
+</script>
+</body>
+</html>

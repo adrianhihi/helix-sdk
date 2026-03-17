@@ -6,7 +6,7 @@
 <title>Helix SDK — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz@12..96;wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #fdf7ed;
@@ -36,49 +36,94 @@
     min-height: 100vh;
   }
 
-  /* ── Header ────────────────────────────────── */
-  header {
-    text-align: center;
-    padding: 2.5rem 1rem 1rem;
+  /* ── Nav bar ────────────────────────────────── */
+  .nav {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 1rem 0;
   }
-  header h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+  .nav-pills {
+    display: inline-flex;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.25rem;
+    gap: 0.2rem;
   }
-  header h1 span { color: var(--amber); }
-  header p {
+  .nav-pill {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.45rem 1.3rem;
+    border-radius: 9px;
+    text-decoration: none;
     color: var(--text-dim);
-    font-size: 0.95rem;
-    margin-top: 0.3rem;
+    transition: all 0.2s;
+  }
+  .nav-pill:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.5);
+  }
+  .nav-pill.active {
+    background: linear-gradient(135deg, var(--amber), #ea580c);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(217,119,6,0.25);
+  }
+
+  /* ── Hero header ───────────────────────────── */
+  .hero {
+    text-align: center;
+    padding: 3rem 1rem 0.5rem;
+  }
+  .hero-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .hero-title span { color: var(--amber); }
+  .hero-tagline {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 0.5rem;
+  }
+  .hero-sub {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.4rem;
+    letter-spacing: 0.01em;
   }
 
   /* ── Run button ────────────────────────────── */
   .actions {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    padding: 1rem;
+    padding: 1.5rem 1rem 1.25rem;
   }
   .btn {
     font-family: var(--sans);
     font-weight: 700;
-    font-size: 1rem;
-    padding: 0.7rem 2.4rem;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s;
   }
   .btn-primary {
+    font-size: 1.15rem;
+    padding: 0.85rem 3.2rem;
     background: linear-gradient(135deg, #d97706, #ea580c);
     color: #fff;
-    box-shadow: 0 4px 14px rgba(217,119,6,0.3);
+    box-shadow: 0 6px 24px rgba(217,119,6,0.35);
+    letter-spacing: 0.01em;
   }
   .btn-primary:hover {
     background: linear-gradient(135deg, #b45309, #c2410c);
-    box-shadow: 0 6px 20px rgba(217,119,6,0.4);
-    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(217,119,6,0.45);
+    transform: translateY(-2px);
   }
   .btn-primary:disabled {
     background: #d6d3d1;
@@ -96,6 +141,7 @@
     margin: 0 auto;
     padding: 0 1.5rem 2rem;
   }
+
   .panel {
     background: var(--glass);
     backdrop-filter: blur(20px);
@@ -109,15 +155,30 @@
     min-height: 540px;
     transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
   }
+
+  /* Panel tints + left accent borders */
+  .panel-without {
+    background: rgba(254,226,226,0.18);
+    border-left: 3px solid var(--red);
+  }
+  .panel-with {
+    background: rgba(187,247,208,0.15);
+    border-left: 3px solid var(--green);
+  }
+
   .panel.crashed {
     border-color: var(--red);
-    box-shadow: 0 0 24px rgba(220,38,38,0.18);
-    background: rgba(254,202,202,0.2);
+    box-shadow: 0 0 0 2px rgba(220,38,38,0.4), 0 8px 32px rgba(220,38,38,0.12);
+    background: rgba(254,202,202,0.25);
+  }
+  .panel.running-glow {
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.3), 0 8px 32px rgba(22,163,74,0.1);
   }
   .panel.completed {
     border-color: var(--green);
-    box-shadow: 0 0 24px rgba(22,163,74,0.15);
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.35), 0 8px 32px rgba(22,163,74,0.12);
   }
+
   .panel-header {
     display: flex;
     justify-content: space-between;
@@ -246,31 +307,64 @@
     80% { transform: translateX(4px); }
   }
 
-  /* ── PCEC indicator ────────────────────────── */
+  /* ── PCEC indicator — horizontal boxes ─────── */
   .pcec-indicator {
     display: none;
-    gap: 0.2rem;
-    margin: 0.5rem 0;
-    padding: 0.55rem 0.75rem;
-    background: rgba(13,148,136,0.08);
-    border: 1px solid rgba(13,148,136,0.2);
-    border-radius: 10px;
+    margin: 0.6rem 0;
+    padding: 0.6rem;
+    background: rgba(13,148,136,0.06);
+    border: 1px solid rgba(13,148,136,0.15);
+    border-radius: 12px;
     transition: opacity 0.4s;
   }
-  .pcec-indicator.active { display: flex; flex-direction: column; }
+  .pcec-indicator.active { display: block; }
   .pcec-indicator.fading { opacity: 0; }
-  .pcec-step {
-    font-family: var(--mono);
-    font-size: 0.74rem;
-    color: var(--text-dim);
-    padding: 0.12rem 0;
-    opacity: 0.35;
-    transition: all 0.25s;
+
+  .pcec-boxes {
+    display: flex;
+    align-items: center;
+    gap: 0;
   }
-  .pcec-step.done {
-    opacity: 1;
-    color: var(--teal);
+  .pcec-box {
+    flex: 1;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 0.45rem 0.3rem;
+    border-radius: 8px;
+    background: #e7e5e4;
+    color: var(--text-dim);
+    transition: all 0.3s;
+    line-height: 1.3;
+  }
+  .pcec-box .pcec-emoji { font-size: 1rem; display: block; margin-bottom: 0.15rem; }
+  .pcec-box.active-step {
+    background: rgba(217,119,6,0.15);
+    color: var(--amber);
     font-weight: 500;
+    box-shadow: 0 0 0 1.5px var(--amber);
+  }
+  .pcec-box.done-step {
+    background: rgba(22,163,74,0.12);
+    color: var(--green);
+    font-weight: 500;
+    box-shadow: 0 0 0 1.5px var(--green);
+  }
+  .pcec-arrow {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    padding: 0 0.25rem;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+  .pcec-detail {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--teal);
+    margin-top: 0.4rem;
+    min-height: 1rem;
+    text-align: center;
+    opacity: 0.85;
   }
 
   /* ── Summary section ───────────────────────── */
@@ -280,42 +374,81 @@
     margin: 0 auto 1.5rem;
     padding: 0 1.5rem;
   }
-  .summary-section.visible { display: block; }
+  .summary-section.visible { display: block; animation: fadeIn 0.4s ease; }
   .summary-section h2 {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+    text-align: center;
   }
-  .summary-grid {
+
+  .summary-comparison {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto 1.5rem;
   }
-  .summary-card {
+  .summary-side {
+    text-align: center;
+    padding: 1.5rem;
     background: var(--glass);
     backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 14px;
-    padding: 1rem 1.25rem;
+    border-radius: 16px;
   }
-  .summary-card h3 {
-    font-size: 0.85rem;
-    margin-bottom: 0.6rem;
+  .summary-side-label {
+    font-size: 0.78rem;
+    font-weight: 600;
     color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
   }
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
+  .summary-big-num {
     font-family: var(--mono);
-    font-size: 0.82rem;
-    padding: 0.3rem 0;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
   }
-  .summary-row:last-child { border-bottom: none; }
-  .summary-row .val { font-weight: 700; }
-  .summary-row .val.red { color: var(--red); }
-  .summary-row .val.green { color: var(--green); }
-  .summary-row .val.teal { color: var(--teal); }
+  .summary-big-num.red { color: var(--red); }
+  .summary-big-num.green { color: var(--green); }
+  .summary-detail {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+  }
+  .summary-vs {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-dim);
+    padding: 0 1rem;
+  }
+
+  .summary-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .summary-stat {
+    text-align: center;
+  }
+  .summary-stat-value {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .summary-stat-value.green { color: var(--green); }
+  .summary-stat-value.teal { color: var(--teal); }
+  .summary-stat-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
 
   /* ── Gene Map table ────────────────────────── */
   .gene-map-section {
@@ -324,7 +457,7 @@
     margin: 0 auto 2rem;
     padding: 0 1.5rem;
   }
-  .gene-map-section.visible { display: block; }
+  .gene-map-section.visible { display: block; animation: fadeIn 0.4s ease; }
   .gene-map-section h2 {
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
@@ -367,26 +500,55 @@
   .tag-error { background: var(--red-light); color: var(--red); }
   .tag-strategy { background: var(--teal-light); color: var(--teal); }
 
+  /* ── Footer ────────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 2rem 1rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+  .footer a {
+    color: var(--amber);
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+  .footer-sep { opacity: 0.4; margin: 0 0.5rem; }
+
   /* ── Responsive ────────────────────────────── */
   @media (max-width: 768px) {
-    .panels, .summary-grid { grid-template-columns: 1fr; }
+    .panels { grid-template-columns: 1fr; }
+    .summary-comparison { grid-template-columns: 1fr; gap: 0.75rem; }
+    .summary-vs { display: none; }
+    .hero-title { font-size: 2.4rem; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🧬 <span>Helix</span> SDK</h1>
-  <p>Self-repairing agent wrapper — live PCEC demo</p>
-</header>
+<!-- ── Nav ──────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-pills">
+    <a class="nav-pill active" href="/">Live Demo</a>
+    <a class="nav-pill" href="/scenarios.html">3 Scenarios</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-title">🧬 <span>Helix</span></div>
+  <div class="hero-tagline">Two lines of code. Your agent never halts again.</div>
+  <div class="hero-sub">Real PCEC engine &middot; SQLite Gene Map &middot; Part of LaoMOS</div>
+</div>
 
 <div class="actions">
   <button class="btn btn-primary" id="runBtn" onclick="runDemo()">Run Demo</button>
 </div>
 
+<!-- ── Panels ───────────────────────────────── -->
 <div class="panels">
   <!-- Part 1: Without Helix -->
-  <div class="panel" id="panel1">
+  <div class="panel panel-without" id="panel1">
     <div class="panel-header">
       <span class="panel-title">⚠️ Without Helix</span>
       <span class="panel-badge" id="badge1">waiting</span>
@@ -411,7 +573,7 @@
   </div>
 
   <!-- Part 2: With Helix -->
-  <div class="panel" id="panel2">
+  <div class="panel panel-with" id="panel2">
     <div class="panel-header">
       <span class="panel-title">🧬 With Helix</span>
       <span class="panel-badge" id="badge2">waiting</span>
@@ -432,35 +594,50 @@
       </div>
     </div>
     <div class="pcec-indicator" id="pcecIndicator">
-      <div class="pcec-step" id="pcec-perceive">🔍 Perceive</div>
-      <div class="pcec-step" id="pcec-construct">🔧 Construct</div>
-      <div class="pcec-step" id="pcec-evaluate">⚖️ Evaluate</div>
-      <div class="pcec-step" id="pcec-commit">✅ Commit</div>
+      <div class="pcec-boxes">
+        <div class="pcec-box" id="pcec-perceive"><span class="pcec-emoji">🔍</span>Perceive</div>
+        <span class="pcec-arrow">→</span>
+        <div class="pcec-box" id="pcec-construct"><span class="pcec-emoji">🔧</span>Construct</div>
+        <span class="pcec-arrow">→</span>
+        <div class="pcec-box" id="pcec-evaluate"><span class="pcec-emoji">⚖️</span>Evaluate</div>
+        <span class="pcec-arrow">→</span>
+        <div class="pcec-box" id="pcec-commit"><span class="pcec-emoji">✅</span>Commit</div>
+      </div>
+      <div class="pcec-detail" id="pcecDetail"></div>
     </div>
     <div class="log-area" id="log2"></div>
   </div>
 </div>
 
-<!-- Summary comparison -->
+<!-- ── Summary ──────────────────────────────── -->
 <div class="summary-section" id="summarySection">
-  <h2>📊 Comparison</h2>
-  <div class="summary-grid">
-    <div class="summary-card">
-      <h3>⚠️ Part 1 — Without Helix</h3>
-      <div class="summary-row"><span>Iterations completed</span><span class="val red" id="sum1-completed">—</span></div>
-      <div class="summary-row"><span>Human interventions</span><span class="val red" id="sum1-human">—</span></div>
-      <div class="summary-row"><span>Auto-repairs</span><span class="val" id="sum1-repairs">0</span></div>
+  <h2>📊 Results</h2>
+  <div class="summary-comparison">
+    <div class="summary-side">
+      <div class="summary-side-label">⚠️ Without Helix</div>
+      <div class="summary-big-num red" id="sum1-big">7/40</div>
+      <div class="summary-detail">iterations completed</div>
     </div>
-    <div class="summary-card">
-      <h3>🧬 Part 2 — With Helix</h3>
-      <div class="summary-row"><span>Iterations completed</span><span class="val green" id="sum2-completed">—</span></div>
-      <div class="summary-row"><span>Human interventions</span><span class="val green" id="sum2-human">—</span></div>
-      <div class="summary-row"><span>Auto-repairs</span><span class="val teal" id="sum2-repairs">—</span></div>
+    <div class="summary-vs">vs</div>
+    <div class="summary-side">
+      <div class="summary-side-label">🧬 With Helix</div>
+      <div class="summary-big-num green" id="sum2-big">40/40</div>
+      <div class="summary-detail">iterations completed</div>
+    </div>
+  </div>
+  <div class="summary-stats">
+    <div class="summary-stat">
+      <div class="summary-stat-value green" id="sum-human">0</div>
+      <div class="summary-stat-label">Human Interventions</div>
+    </div>
+    <div class="summary-stat">
+      <div class="summary-stat-value teal" id="sum-repairs">4</div>
+      <div class="summary-stat-label">Auto-Repairs</div>
     </div>
   </div>
 </div>
 
-<!-- Gene Map table -->
+<!-- ── Gene Map ─────────────────────────────── -->
 <div class="gene-map-section" id="geneMapSection">
   <h2>🗄️ Gene Map — Stored Repairs</h2>
   <table class="gene-table">
@@ -475,6 +652,15 @@
     <tbody id="geneMapBody"></tbody>
   </table>
 </div>
+
+<!-- ── Footer ───────────────────────────────── -->
+<footer class="footer">
+  <a href="https://github.com/adrianhihi/helix-sdk">github.com/adrianhihi/helix-sdk</a>
+  <span class="footer-sep">&middot;</span>
+  Part of LaoMOS
+  <span class="footer-sep">&middot;</span>
+  <a href="https://laomos.com/">laomos.com</a>
+</footer>
 
 <script>
 const TOTAL = 40;
@@ -502,39 +688,37 @@ function updateMetrics(part) {
   } else {
     $('repairs2').textContent = state.repairs2;
   }
-  const itersDone = state['iter' + part];
+  var itersDone = state['iter' + part];
   $('progress' + part).style.width = ((itersDone / TOTAL) * 100) + '%';
 }
 
 function resetPCEC() {
-  ['perceive', 'construct', 'evaluate', 'commit'].forEach(s => {
-    $('pcec-' + s).className = 'pcec-step';
-    $('pcec-' + s).textContent = {
-      perceive: '🔍 Perceive', construct: '🔧 Construct',
-      evaluate: '⚖️ Evaluate', commit: '✅ Commit'
-    }[s];
+  ['perceive', 'construct', 'evaluate', 'commit'].forEach(function(s) {
+    $('pcec-' + s).className = 'pcec-box';
   });
+  $('pcecDetail').textContent = '';
 }
 
 function runDemo() {
-  // Reset UI
-  const btn = $('runBtn');
+  var btn = $('runBtn');
   btn.disabled = true;
   btn.textContent = 'Running...';
+
+  // Reset UI
   $('log1').innerHTML = '';
   $('log2').innerHTML = '';
   $('crashBanner1').innerHTML = '';
-  $('panel1').className = 'panel';
-  $('panel2').className = 'panel';
+  $('panel1').className = 'panel panel-without';
+  $('panel2').className = 'panel panel-with';
   $('summarySection').className = 'summary-section';
   $('geneMapSection').className = 'gene-map-section';
   $('geneMapBody').innerHTML = '';
   $('pcecIndicator').className = 'pcec-indicator';
   resetPCEC();
   state = { completed1: 0, crashes1: 0, repairs1: 0, completed2: 0, crashes2: 0, repairs2: 0, iter1: 0, iter2: 0 };
-  $('status1').textContent = '—';
+  $('status1').textContent = '\u2014';
   $('status1').style.color = 'var(--text-dim)';
-  $('status2').textContent = '—';
+  $('status2').textContent = '\u2014';
   $('status2').style.color = 'var(--text-dim)';
   updateMetrics(1);
   updateMetrics(2);
@@ -543,10 +727,13 @@ function runDemo() {
   $('badge2').textContent = 'waiting';
   $('badge2').className = 'panel-badge';
 
-  const es = new EventSource('/api/helix/stream');
+  // Track which PCEC steps are done for current repair
+  var pcecDone = [];
 
-  es.onmessage = (e) => {
-    const d = JSON.parse(e.data);
+  var es = new EventSource('/api/helix/stream');
+
+  es.onmessage = function(e) {
+    var d = JSON.parse(e.data);
 
     switch (d.type) {
       case 'part':
@@ -554,9 +741,12 @@ function runDemo() {
         $('badge' + d.part).className = 'panel-badge active';
         $('status' + d.part).textContent = 'live';
         $('status' + d.part).style.color = 'var(--amber)';
+        if (d.part === 2) {
+          $('panel2').className = 'panel panel-with running-glow';
+        }
         break;
 
-      case 'iter': {
+      case 'iter':
         state['iter' + d.part] = d.iter;
         if (d.status === 'ok') {
           addLog(d.part, '\u2713 [iter ' + String(d.iter).padStart(2, '0') + ']  ' + d.source.padEnd(16) + ' ' + d.delta, 'ok');
@@ -570,17 +760,17 @@ function runDemo() {
           state['repairs' + d.part]++;
           // Fade out PCEC indicator
           $('pcecIndicator').classList.add('fading');
-          setTimeout(() => {
+          setTimeout(function() {
             $('pcecIndicator').className = 'pcec-indicator';
             resetPCEC();
+            pcecDone = [];
           }, 400);
         }
         updateMetrics(d.part);
         break;
-      }
 
       case 'crash':
-        $('panel1').className = 'panel crashed';
+        $('panel1').className = 'panel panel-without crashed';
         $('crashBanner1').innerHTML = '<div class="crash-banner">\uD83D\uDCA5 Agent crashed at iteration ' + d.iter + '<br><small>' + d.message + '</small></div>';
         $('badge1').textContent = 'Human Intervention Required';
         $('badge1').className = 'panel-badge crashed-badge';
@@ -590,13 +780,17 @@ function runDemo() {
 
       case 'pcec_step':
         $('pcecIndicator').className = 'pcec-indicator active';
-        $('pcec-' + d.step).className = 'pcec-step done';
-        $('pcec-' + d.step).textContent = {
-          perceive: '\uD83D\uDD0D Perceive: ' + d.value,
-          construct: '\uD83D\uDD27 Construct: ' + d.value,
-          evaluate: '\u2696\uFE0F Evaluate: ' + d.value,
-          commit: '\u2705 Commit: ' + d.value,
-        }[d.step];
+        // Mark previous steps as done (green), current as active (amber)
+        pcecDone.forEach(function(prev) {
+          $('pcec-' + prev).className = 'pcec-box done-step';
+        });
+        $('pcec-' + d.step).className = 'pcec-box active-step';
+        pcecDone.push(d.step);
+        // If commit, mark it done immediately
+        if (d.step === 'commit') {
+          $('pcec-' + d.step).className = 'pcec-box done-step';
+        }
+        $('pcecDetail').textContent = d.value;
         addLog(2, '  ' + {
           perceive: '\uD83D\uDD0D ' + d.value,
           construct: '\uD83D\uDD27 ' + d.value,
@@ -614,26 +808,24 @@ function runDemo() {
           if (d.humanInterventions > 0) {
             $('badge1').className = 'panel-badge crashed-badge';
           }
-          $('sum1-completed').textContent = d.completed + ' / ' + d.total;
-          $('sum1-human').textContent = d.humanInterventions;
-          $('sum1-repairs').textContent = d.autoRepairs;
+          $('sum1-big').textContent = d.completed + '/' + d.total;
         } else {
           $('badge2').textContent = 'done';
           $('badge2').className = 'panel-badge';
-          $('panel2').className = 'panel completed';
+          $('panel2').className = 'panel panel-with completed';
           $('status2').textContent = 'done';
           $('status2').style.color = 'var(--green)';
-          $('sum2-completed').textContent = d.completed + ' / ' + d.total;
-          $('sum2-human').textContent = d.humanInterventions;
-          $('sum2-repairs').textContent = d.autoRepairs;
+          $('sum2-big').textContent = d.completed + '/' + d.total;
+          $('sum-human').textContent = d.humanInterventions;
+          $('sum-repairs').textContent = d.autoRepairs;
         }
         break;
 
-      case 'gene_map': {
-        const tbody = $('geneMapBody');
+      case 'gene_map':
+        var tbody = $('geneMapBody');
         d.repairs.forEach(function(r) {
-          const tr = document.createElement('tr');
-          const ts = r.createdAt.replace('T', ' ').replace(/\.\d+Z$/, '');
+          var tr = document.createElement('tr');
+          var ts = r.createdAt.replace('T', ' ').replace(/\.\d+Z$/, '');
           tr.innerHTML =
             '<td>' + r.id + '</td>' +
             '<td><span class="tag tag-error">' + r.errorType + '</span></td>' +
@@ -644,7 +836,6 @@ function runDemo() {
         $('summarySection').className = 'summary-section visible';
         $('geneMapSection').className = 'gene-map-section visible';
         break;
-      }
 
       case 'done':
         es.close();

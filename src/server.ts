@@ -136,9 +136,13 @@ app.get("/api/helix/gene-map", (_req, res) => {
   res.json({ repairs, stats });
 });
 
-// ── Serve index.html ─────────────────────────────────────────
+// ── Serve pages ──────────────────────────────────────────────
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "..", "static", "index.html"));
+});
+
+app.get("/scenarios.html", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "static", "scenarios.html"));
 });
 
 app.listen(PORT, () => {
