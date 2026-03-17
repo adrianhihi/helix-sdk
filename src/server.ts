@@ -4,11 +4,19 @@ import path from "path";
 import { GeneMap } from "./gene-map";
 import { PCEC } from "./pcec";
 import { CryptoDataScenario } from "./scenarios";
+import { LiveCryptoScenario } from "./scenarios/live-crypto";
 
 const app = express();
 const PORT = 7842;
 
 app.use(cors());
+
+// Landing page must be registered before static middleware
+// (static would serve index.html for "/" otherwise)
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "static", "landing.html"));
+});
+
 app.use(express.static(path.join(__dirname, "..", "static")));
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -33,8 +41,73 @@ app.get("/api/helix/stream", async (req, res) => {
 
   const geneMap = new GeneMap();
   const pcec = new PCEC(geneMap, false);
+  const mode = req.query.mode as string | undefined;
 
-  send({ type: "start" });
+  send({ type: "start", mode: mode === "live" ? "live" : "simulated" });
+
+  // ── Live mode ──────────────────────────────────────────────
+  if (mode === "live") {
+    send({ type: "part", part: 2, label: "Live — Real CoinGecko API" });
+
+    const scenario = new LiveCryptoScenario(30);
+    let completed = 0;
+    let repairs = 0;
+
+    for (let i = 1; i <= scenario.totalIterations; i++) {
+      if (clientDisconnected) break;
+
+      try {
+        const result = await scenario.agent(i);
+        const priceStr = Object.entries(result.prices)
+          .map(([k, v]) => `${k}=$${v}`)
+          .join("  ");
+        completed++;
+        send({ type: "iter", part: 2, iter: i, source: result.source, delta: priceStr, status: "ok", httpStatus: result.httpStatus });
+      } catch (err) {
+        const error = err as Error;
+        const perceived = pcec.perceive(error);
+        send({ type: "pcec_step", step: "perceive", value: perceived });
+        await sleep(150);
+
+        const constructed = pcec.construct(perceived);
+        send({ type: "pcec_step", step: "construct", value: JSON.stringify(constructed) });
+        await sleep(150);
+
+        const evaluated = pcec.evaluate(constructed, error);
+        send({ type: "pcec_step", step: "evaluate", value: evaluated });
+        await sleep(150);
+
+        pcec.run("live-agent", error);
+        send({ type: "pcec_step", step: "commit", value: "saved to gene map" });
+        await sleep(150);
+
+        send({ type: "repair_done", errorType: perceived, strategy: evaluated });
+        repairs++;
+
+        // Retry with exponential backoff
+        await sleep(5000);
+        try {
+          const retryResult = await scenario.agent(i);
+          const priceStr = Object.entries(retryResult.prices)
+            .map(([k, v]) => `${k}=$${v}`)
+            .join("  ");
+          completed++;
+          send({ type: "iter", part: 2, iter: i, source: retryResult.source, delta: priceStr, status: "repaired", httpStatus: retryResult.httpStatus });
+        } catch (retryErr) {
+          send({ type: "iter", part: 2, iter: i, source: "", delta: "", status: "crash", httpStatus: 0 });
+        }
+      }
+      await sleep(3000);
+    }
+
+    send({ type: "part_summary", part: 2, completed, total: scenario.totalIterations, humanInterventions: 0, autoRepairs: repairs });
+    const liveRepairs = geneMap.getRepairs();
+    send({ type: "gene_map", repairs: liveRepairs });
+    send({ type: "done" });
+    geneMap.close();
+    res.end();
+    return;
+  }
 
   // ── Part 1: Without Helix ──────────────────────────────────
   const scenario1 = new CryptoDataScenario(40);
@@ -137,12 +210,20 @@ app.get("/api/helix/gene-map", (_req, res) => {
 });
 
 // ── Serve pages ──────────────────────────────────────────────
-app.get("/", (_req, res) => {
+app.get("/dashboard", (_req, res) => {
   res.sendFile(path.join(__dirname, "..", "static", "index.html"));
+});
+
+app.get("/scenarios", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "static", "scenarios.html"));
 });
 
 app.get("/scenarios.html", (_req, res) => {
   res.sendFile(path.join(__dirname, "..", "static", "scenarios.html"));
+});
+
+app.get("/automaton", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "static", "automaton.html"));
 });
 
 app.listen(PORT, () => {

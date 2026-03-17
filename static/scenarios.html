@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LaoMOS SDK — 3 Crypto Scenarios</title>
+<title>Helix SDK — 3 Crypto Scenarios</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap');
 :root{
@@ -287,11 +287,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 </head>
 <body>
 <section class="hero">
-  <div class="htag">LaoMOS SDK · Three Crypto Scenarios</div>
+  <div class="htag">Helix SDK · Three Crypto Scenarios</div>
   <h1>Your agents.<br><em>Never halted.</em></h1>
-  <p class="hsub">VCs measure one metric: <strong>autonomous runtime</strong> — how long before a human intervenes. LaoMOS SDK extends it to infinity.</p>
+  <p class="hsub">VCs measure one metric: <strong>autonomous runtime</strong> — how long before a human intervenes. Helix SDK extends it to infinity.</p>
   <div class="hpills">
-    <div class="pill"><span class="pdot" style="background:var(--g)"></span>pip install laomos</div>
+    <div class="pill"><span class="pdot" style="background:var(--g)"></span>npm install @helix/sdk</div>
     <div class="pill"><span class="pdot" style="background:var(--t)"></span>LangChain · CrewAI · any agent</div>
     <div class="pill"><span class="pdot" style="background:var(--al)"></span>Gene Market · 4,700 capsules</div>
   </div>
@@ -302,8 +302,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         <span class="cc"># Your existing agent, zero changes required</span><br>
         <span class="ck">from</span> <span class="cv">langchain</span> <span class="ck">import</span> <span class="cv">Agent</span><br>
         <span class="cv">agent</span> = <span class="cv">Agent</span>(model=<span class="cs">"gpt-4o"</span>, tools=[...])<br><br>
-        <span class="cc"># Add LaoMOS — PCEC self-repair + Gene Market immunity</span><br>
-        <span class="cn">from laomos import wrap</span><br>
+        <span class="cc"># Add Helix — PCEC self-repair + Gene Market immunity</span><br>
+        <span class="cn">from helix import wrap</span><br>
         <span class="cn">agent = wrap(agent, gene_market=True)</span>
       </div>
     </div>
@@ -313,11 +313,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 <div class="snav">
   <div class="snav-in">
-    <div class="snav-brand">laomos/sdk</div>
+    <div class="snav-brand">helix/sdk</div>
     <div class="snav-pills">
-      <div class="sp2 active" onclick="goTo('s1')">01 · Data Pipeline</div>
-      <div class="sp2" onclick="goTo('s2')">02 · Research Grid</div>
-      <div class="sp2" onclick="goTo('s3')">03 · Trading Dashboard</div>
+      <a class="sp2" href="/" style="text-decoration:none">Home</a>
+      <a class="sp2" href="/dashboard" style="text-decoration:none">Live Demo</a>
+      <a class="sp2" href="/automaton" style="text-decoration:none">Web4</a>
+      <div class="sp2 active" onclick="goTo('s1')">01 · Pipeline</div>
+      <div class="sp2" onclick="goTo('s2')">02 · Research</div>
+      <div class="sp2" onclick="goTo('s3')">03 · Trading</div>
     </div>
   </div>
 </div>
@@ -336,8 +339,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="s1-layout">
       <div class="s1-pane" style="position:relative;">
         <div class="s1-split-hdr">
-          <div class="s1-hdr-item wo" id="s1-hdr-wo"><div class="s1-icon">⚠️</div><div class="s1-htitle">Without LaoMOS</div></div>
-          <div class="s1-hdr-item wl"><div class="s1-icon">🧬</div><div class="s1-htitle">With LaoMOS</div><span class="s1-running-badge" id="s1-running-badge">✓ RUNNING</span></div>
+          <div class="s1-hdr-item wo" id="s1-hdr-wo"><div class="s1-icon">⚠️</div><div class="s1-htitle">Without Helix</div></div>
+          <div class="s1-hdr-item wl"><div class="s1-icon">🧬</div><div class="s1-htitle">With Helix</div><span class="s1-running-badge" id="s1-running-badge">✓ RUNNING</span></div>
         </div>
         <div class="s1-mrow">
           <div class="s1-mc"><div class="s1-mv" id="s1-wo-c" style="color:var(--tx)">0</div><div class="s1-ml">calls</div></div>
@@ -376,8 +379,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
     </div>
     <div class="res3">
-      <div class="rc"><div class="rv" id="s1d1" style="color:var(--r)">—</div><div class="rl">Human interventions<br>without LaoMOS</div></div>
-      <div class="rc"><div class="rv" style="color:var(--g)">0</div><div class="rl">Human interventions<br>with LaoMOS</div></div>
+      <div class="rc"><div class="rv" id="s1d1" style="color:var(--r)">—</div><div class="rl">Human interventions<br>without Helix</div></div>
+      <div class="rc"><div class="rv" style="color:var(--g)">0</div><div class="rl">Human interventions<br>with Helix</div></div>
       <div class="rc"><div class="rv" id="s1d3" style="color:var(--a)">—</div><div class="rl">Time saved</div></div>
     </div>
   </div>
@@ -389,7 +392,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="wrap">
     <div class="snum">02 · Crypto Research Agent</div>
     <h2 class="stitle">Analyze 50 Monad projects.<br><em>Watch the grid fill up.</em></h2>
-    <p class="sdesc">A VC's agent analyzes every project in the Monad ecosystem. <strong>Each card is a project — watch them turn red and stall without LaoMOS, turn teal and recover with it.</strong></p>
+    <p class="sdesc">A VC's agent analyzes every project in the Monad ecosystem. <strong>Each card is a project — watch them turn red and stall without Helix, turn teal and recover with it.</strong></p>
     <div class="ctrls">
       <div class="spw"><span>Speed</span><input type="range" id="s2sp" min="1" max="20" value="8" style="width:66px"><span id="s2spL">8x</span></div>
       <button class="rbtn" id="s2run" onclick="startS2()">▶  Analyze 50 Projects</button>
@@ -400,7 +403,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         <div class="s2-board-title">Research scoreboard</div>
         <div class="s2-rows">
           <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--g)"></div>Completed</div><div class="s2-val" id="s2done" style="color:var(--g)">0</div></div>
-          <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--r)"></div>Halted (w/o LaoMOS)</div><div class="s2-val" id="s2halted" style="color:var(--r)">0</div></div>
+          <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--r)"></div>Halted (w/o Helix)</div><div class="s2-val" id="s2halted" style="color:var(--r)">0</div></div>
           <div class="s2-div"></div>
           <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--t)"></div>Auto-repaired</div><div class="s2-val" id="s2repaired" style="color:var(--t)">0</div></div>
           <div class="s2-row"><div class="s2-label"><div class="s2-dot" style="background:var(--mu)"></div>Remaining</div><div class="s2-val" id="s2rem" style="color:var(--mu)">50</div></div>
@@ -429,8 +432,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
     </div>
     <div class="res3" style="margin-top:14px;">
-      <div class="rc"><div class="rv" id="s2d1" style="color:var(--r)">—</div><div class="rl">Projects abandoned<br>without LaoMOS</div></div>
-      <div class="rc"><div class="rv" style="color:var(--g)">50/50</div><div class="rl">Projects completed<br>with LaoMOS</div></div>
+      <div class="rc"><div class="rv" id="s2d1" style="color:var(--r)">—</div><div class="rl">Projects abandoned<br>without Helix</div></div>
+      <div class="rc"><div class="rv" style="color:var(--g)">50/50</div><div class="rl">Projects completed<br>with Helix</div></div>
       <div class="rc"><div class="rv" id="s2d3" style="color:var(--a)">—</div><div class="rl">Time wasted<br>on halts</div></div>
     </div>
   </div>
@@ -442,7 +445,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="wrap">
     <div class="snum">03 · Agentic Trading Monitor</div>
     <h2 class="stitle">Yield pools. Real money.<br><em>Bad data = wrong trades.</em></h2>
-    <p class="sdesc">A DeFi protocol watches 4 pools, making autonomous rebalance decisions. <strong>Without LaoMOS, a silent oracle failure keeps the agent running on stale data — sending wrong signals to the execution layer.</strong></p>
+    <p class="sdesc">A DeFi protocol watches 4 pools, making autonomous rebalance decisions. <strong>Without Helix, a silent oracle failure keeps the agent running on stale data — sending wrong signals to the execution layer.</strong></p>
     <div class="ctrls">
       <div class="spw"><span>Speed</span><input type="range" id="s3sp" min="1" max="20" value="8" style="width:66px"><span id="s3spL">8x</span></div>
       <button class="rbtn" id="s3run" onclick="startS3()">▶  Start Monitor (6 hours)</button>
@@ -493,8 +496,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
     </div>
     <div class="res3" style="margin-top:14px;">
-      <div class="rc"><div class="rv" id="s3d1" style="color:var(--r)">—</div><div class="rl">Critical failures<br>without LaoMOS</div></div>
-      <div class="rc"><div class="rv" style="color:var(--g)">0</div><div class="rl">Bad signals sent<br>with LaoMOS</div></div>
+      <div class="rc"><div class="rv" id="s3d1" style="color:var(--r)">—</div><div class="rl">Critical failures<br>without Helix</div></div>
+      <div class="rc"><div class="rv" style="color:var(--g)">0</div><div class="rl">Bad signals sent<br>with Helix</div></div>
       <div class="rc"><div class="rv" id="s3d3" style="color:var(--a)">—</div><div class="rl">Downtime prevented</div></div>
     </div>
   </div>
@@ -508,12 +511,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <p class="sum-sub">Same agents. Same failures. Two lines of code changes everything.</p>
     </div>
     <div class="sum-grid">
-      <div class="sc"><div class="sv" style="color:var(--g)">0</div><div class="sl">Total human interventions<br>with LaoMOS SDK</div></div>
+      <div class="sc"><div class="sv" style="color:var(--g)">0</div><div class="sl">Total human interventions<br>with Helix SDK</div></div>
       <div class="sc"><div class="sv" style="color:var(--a)">2</div><div class="sl">Lines of code<br>to integrate</div></div>
       <div class="sc"><div class="sv" style="color:var(--t)">∞</div><div class="sl">Autonomous runtime<br>ceiling</div></div>
     </div>
     <div class="pq"><p>"One team's fix becomes every team's immunity. Gene Market compounds with every execution."</p></div>
-    <div class="footnote">laomos.com · @laomos/sdk · gene market phase 2 · CryptoBench arXiv:2512.00417</div>
+    <div class="footnote">laomos.com · @helix/sdk · gene market phase 2 · CryptoBench arXiv:2512.00417</div>
   </div>
 </section>
 
@@ -592,7 +595,7 @@ function startS1(){
   document.getElementById('s1-w-log').classList.add('with-bg');
   for(let i=0;i<5;i++)setNode(i,'ok','polling');
   lg1('wo','09:00','RUN','tr','Pipeline started · 12 protocols · 8h schedule');
-  lg1('w','09:00','RUN','tr','LaoMOS SDK active');
+  lg1('w','09:00','RUN','tr','Helix SDK active');
   lg1('w','09:00','OK','tok','Gene Market: failover configs loaded','lg');
   s1.woIv=setInterval(tickS1wo,s1tk());s1.wIv=setInterval(tickS1w,s1tk());
   document.getElementById('s1sp').addEventListener('input',function(){document.getElementById('s1spL').textContent=this.value+'x';if(s1.run){clearInterval(s1.woIv);clearInterval(s1.wIv);s1.woIv=setInterval(tickS1wo,s1tk());s1.wIv=setInterval(tickS1w,s1tk());}});

@@ -1,6 +1,8 @@
 import { wrap } from "./src/wrap";
 import { GeneMap } from "./src/gene-map";
+import { PCEC } from "./src/pcec";
 import { CryptoDataScenario } from "./src/scenarios";
+import { LiveCryptoScenario } from "./src/scenarios/live-crypto";
 
 // ── ANSI colors ──────────────────────────────────────────────
 const RED    = "\x1b[31m";
@@ -184,6 +186,73 @@ function showMap(): void {
   console.log();
 }
 
+// ── Live Mode ────────────────────────────────────────────────
+async function runLive(): Promise<void> {
+  console.log(`\n${AMBER}${BOLD}  ⚡ LIVE MODE — real CoinGecko API calls${RESET}`);
+  console.log(`${DIM}  Rate limits will trigger real PCEC repairs${RESET}\n`);
+
+  const scenario = new LiveCryptoScenario(30);
+  const geneMap = new GeneMap();
+  const pcec = new PCEC(geneMap, false);
+  const wrappedAgent = wrap(scenario.agent, { verbose: false });
+
+  let completed = 0;
+  let repairs = 0;
+  let errors = 0;
+
+  for (let i = 1; i <= scenario.totalIterations; i++) {
+    try {
+      const result = await wrappedAgent(i);
+      const priceStr = Object.entries(result.prices)
+        .map(([k, v]) => `${k}=$${v}`)
+        .join("  ");
+      const num = String(i).padStart(2, " ");
+      console.log(`  ${GREEN}✓ [iter ${num}]${RESET}  ${result.source.padEnd(12)} HTTP ${result.httpStatus}  ${DIM}${priceStr}${RESET}`);
+      completed++;
+    } catch (err) {
+      const error = err as Error;
+      const errorType = pcec.perceive(error);
+      const strategies = pcec.construct(errorType);
+      const strategy = pcec.evaluate(strategies, error);
+      pcec.run("live-agent", error);
+
+      const num = String(i).padStart(2, " ");
+      console.log(`  ${AMBER}↺ [iter ${num}]${RESET}  ${error.message}`);
+      console.log(`      ${DIM}🔍 ${errorType} → 🔧 ${strategy} → ✅ saved${RESET}`);
+      repairs++;
+
+      // Retry with exponential backoff
+      await sleep(5000);
+      try {
+        const retryResult = await scenario.agent(i);
+        const priceStr = Object.entries(retryResult.prices)
+          .map(([k, v]) => `${k}=$${v}`)
+          .join("  ");
+        console.log(`  ${TEAL}✓ [iter ${num}]${RESET}  retry ok     HTTP ${retryResult.httpStatus}  ${DIM}${priceStr}${RESET}`);
+        completed++;
+      } catch (retryErr) {
+        console.log(`  ${RED}✗ [iter ${num}]${RESET}  retry failed: ${(retryErr as Error).message}`);
+        errors++;
+      }
+    }
+    await sleep(3000);
+  }
+
+  // Summary
+  const stats = geneMap.getStats();
+  geneMap.close();
+
+  console.log();
+  console.log(`${TEAL}╭──────────────────────────────────────────╮${RESET}`);
+  console.log(`${TEAL}│${BOLD}  Live Mode Summary                      ${RESET}${TEAL}│${RESET}`);
+  console.log(`${TEAL}├──────────────────────────────────────────┤${RESET}`);
+  console.log(`${TEAL}│${RESET}  Iterations completed  ${GREEN}${BOLD}${String(completed).padStart(3)}${RESET} / ${scenario.totalIterations}         ${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Auto-repairs          ${AMBER}${BOLD}${String(repairs).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Failed after retry    ${RED}${BOLD}${String(errors).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Gene Map entries      ${TEAL}${BOLD}${String(stats.totalRepairs).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
+  console.log(`${TEAL}╰──────────────────────────────────────────╯${RESET}`);
+}
+
 // ── Main ─────────────────────────────────────────────────────
 async function main(): Promise<void> {
   if (process.argv.includes("--show-map")) {
@@ -194,9 +263,13 @@ async function main(): Promise<void> {
   console.log(`\n${DIM}helix v0.1.0 — github.com/CarbonSiliconAI/helix-sdk${RESET}`);
   console.log(`${BOLD}${TEAL}@helix/sdk${RESET} ${DIM}— self-repairing agent demo${RESET}`);
 
-  await runWithoutHelix();
-  await sleep(500);
-  await runWithHelix();
+  if (process.argv.includes("--live")) {
+    await runLive();
+  } else {
+    await runWithoutHelix();
+    await sleep(500);
+    await runWithHelix();
+  }
 
   console.log();
 }

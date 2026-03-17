@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helix — Self-Repair SDK for AI Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz@12..96;wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f4;
+  --green: #16a34a;
+  --red: #dc2626;
+  --amber: #d97706;
+  --muted: #6b5535;
+  --text: #1c1008;
+  --text-dim: #78716c;
+  --mono: 'DM Mono', 'Courier New', monospace;
+  --sans: 'Bricolage Grotesque', system-ui, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); font-family:var(--sans); color:var(--text); min-height:100vh; }
+
+/* ── Terminal window ─────────────── */
+.term-wrap {
+  max-width:680px;
+  margin:60px auto 0;
+  border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.12);
+  border:1px solid #e5e0d8;
+  overflow:hidden;
+  background:#fff;
+}
+.term-chrome {
+  display:flex;
+  align-items:center;
+  padding:12px 16px;
+  background:#f5f3ef;
+  border-bottom:1px solid #e5e0d8;
+  position:relative;
+}
+.term-dots { display:flex; gap:7px; }
+.term-dot { width:11px; height:11px; border-radius:50%; }
+.dot-r { background:#ff5f57; }
+.dot-y { background:#febc2e; }
+.dot-g { background:#28c840; }
+.term-title {
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:var(--mono);
+  font-size:11px;
+  color:#a09080;
+  letter-spacing:0.02em;
+}
+.term-body {
+  padding:20px 24px 24px;
+  font-family:var(--mono);
+  font-size:13px;
+  line-height:1.75;
+  min-height:420px;
+  white-space:pre;
+  overflow-x:auto;
+}
+.term-body::-webkit-scrollbar { height:3px; }
+.term-body::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.1); }
+
+/* Cursor */
+.cursor {
+  display:inline-block;
+  width:7px;
+  height:15px;
+  background:var(--text);
+  vertical-align:text-bottom;
+  animation:cursorBlink 0.7s step-end infinite;
+  margin-left:1px;
+}
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Below terminal ──────────────── */
+.hero-section {
+  max-width:680px;
+  margin:0 auto;
+  padding:48px 24px 60px;
+  text-align:center;
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity 0.6s ease, transform 0.6s ease;
+}
+.hero-section.visible {
+  opacity:1;
+  transform:translateY(0);
+}
+.hero-title {
+  font-size:64px;
+  font-weight:800;
+  letter-spacing:-0.035em;
+  line-height:1;
+  color:var(--text);
+}
+.hero-title span { color:var(--amber); }
+.hero-sub {
+  font-size:1.15rem;
+  color:var(--text-dim);
+  margin-top:12px;
+  font-weight:500;
+}
+.hero-pills {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:28px;
+  flex-wrap:wrap;
+}
+.hero-pill {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 18px;
+  border-radius:24px;
+  font-family:var(--mono);
+  font-size:12px;
+  text-decoration:none;
+  transition:all 0.2s;
+  border:1px solid #e5e0d8;
+  background:rgba(255,255,255,0.7);
+  color:var(--muted);
+}
+.hero-pill:hover {
+  background:rgba(255,255,255,1);
+  border-color:var(--amber);
+  color:var(--text);
+}
+.hero-pill.primary {
+  background:linear-gradient(135deg,#d97706,#ea580c);
+  color:#fff;
+  border-color:transparent;
+  font-weight:500;
+  box-shadow:0 4px 14px rgba(217,119,6,0.3);
+}
+.hero-pill.primary:hover {
+  filter:brightness(1.08);
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(217,119,6,0.4);
+}
+
+/* ── Code snippet ────────────────── */
+.code-wrap {
+  max-width:520px;
+  margin:0 auto;
+  border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.08);
+  border:1px solid #e5e0d8;
+  overflow:hidden;
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+}
+.code-wrap.visible { opacity:1; transform:translateY(0); }
+.code-chrome {
+  display:flex;
+  align-items:center;
+  padding:10px 14px;
+  background:#f5f3ef;
+  border-bottom:1px solid #e5e0d8;
+  gap:7px;
+}
+.code-title {
+  font-family:var(--mono);
+  font-size:10px;
+  color:#a09080;
+  margin-left:6px;
+  letter-spacing:0.04em;
+}
+.code-body {
+  padding:16px 20px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.85;
+  background:rgba(255,255,255,0.9);
+}
+.cc { color:#a09080; }
+.ck { color:#7c3aed; }
+.cs { color:var(--green); }
+.cv { color:#1d4ed8; }
+.cn { color:var(--amber); background:rgba(217,119,6,0.08); border-radius:3px; padding:1px 6px; border:1px solid rgba(217,119,6,0.15); }
+
+/* ── Nav ─────────────────────────── */
+.nav { display:flex; justify-content:center; padding:1rem 1rem 0; }
+.nav-pills { display:inline-flex; background:rgba(255,255,255,0.5); backdrop-filter:blur(16px); border:1px solid #e5e0d8; border-radius:12px; padding:0.25rem; gap:0.2rem; }
+.nav-pill { font-family:var(--sans); font-size:0.85rem; font-weight:600; padding:0.45rem 1.3rem; border-radius:9px; text-decoration:none; color:var(--text-dim); transition:all 0.2s; }
+.nav-pill:hover { color:var(--text); background:rgba(255,255,255,0.5); }
+.nav-pill.active { background:linear-gradient(135deg,var(--amber),#ea580c); color:#fff; box-shadow:0 2px 8px rgba(217,119,6,0.25); }
+
+@media (max-width:700px) {
+  .term-wrap, .hero-section, .code-wrap { margin-left:16px; margin-right:16px; }
+  .hero-title { font-size:44px; }
+  .term-body { font-size:11px; padding:14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-pills">
+    <a class="nav-pill active" href="/">Home</a>
+    <a class="nav-pill" href="/dashboard">Live Demo</a>
+    <a class="nav-pill" href="/scenarios">3 Scenarios</a>
+    <a class="nav-pill" href="/automaton">Web4 Survival</a>
+  </div>
+</nav>
+
+<div class="term-wrap">
+  <div class="term-chrome">
+    <div class="term-dots">
+      <div class="term-dot dot-r"></div>
+      <div class="term-dot dot-y"></div>
+      <div class="term-dot dot-g"></div>
+    </div>
+    <div class="term-title">helix — self-repair demo</div>
+  </div>
+  <div class="term-body" id="terminal"></div>
+</div>
+
+<div class="hero-section" id="heroSection">
+  <div class="hero-title"><span>Helix</span></div>
+  <div class="hero-sub">Two lines of code. Your agent never halts again.</div>
+  <div class="hero-pills">
+    <a class="hero-pill" href="https://github.com/adrianhihi/helix-sdk" target="_blank">\uD83E\uDDEC github.com/adrianhihi/helix-sdk</a>
+    <a class="hero-pill primary" href="/dashboard">\u25B6 Live Demo \u2192</a>
+    <a class="hero-pill" href="https://arxiv.org/abs/2512.00417" target="_blank">\uD83D\uDCC4 CryptoBench \u00B7 arXiv:2512.00417</a>
+  </div>
+</div>
+
+<div class="code-wrap" id="codeWrap">
+  <div class="code-chrome">
+    <div class="term-dot dot-r"></div>
+    <div class="term-dot dot-y"></div>
+    <div class="term-dot dot-g"></div>
+    <div class="code-title">agent.ts</div>
+  </div>
+  <div class="code-body">
+    <span class="cc">// Your existing agent, zero changes required</span><br>
+    <span class="ck">const</span> <span class="cv">agent</span> = <span class="ck">async</span> (input) =&gt; { <span class="cc">/* ... */</span> }<br><br>
+    <span class="cc">// Add Helix \u2014 two lines</span><br>
+    <span class="cn">import { wrap } from '@helix/sdk'</span><br>
+    <span class="cn">const resilientAgent = wrap(agent, { geneMarket: true })</span>
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<script>
+var LINES = [
+  { text: '> npm install @helix/sdk', style: 'bold', color: '#1c1008' },
+  { text: '', style: '' },
+  { text: 'added 12 packages in 341ms', style: '', color: '#6b5535' },
+  { text: '', style: '' },
+  { text: '> npx ts-node demo.ts', style: 'bold', color: '#1c1008' },
+  { text: '', style: '' },
+  { text: 'helix v0.1.0 \u2014 github.com/adrianhihi/helix-sdk', style: '', color: '#6b5535' },
+  { text: '', style: '' },
+  { text: '\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E', style: '', color: '#d97706' },
+  { text: '\u2502  PART 1: Without Helix  \u2502', style: '', color: '#d97706' },
+  { text: '\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F', style: '', color: '#d97706' },
+  { text: '', style: '' },
+  { text: '  \u2713 [iter  1]  CoinGecko        +0.42%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  2]  Dune Analytics   -1.23%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  3]  Monad RPC        +0.87%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  4]  Alchemy          -0.34%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  5]  DefiLlama        +1.12%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  6]  CoinGecko        -0.56%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  7]  Monad RPC        +0.91%', style: '', color: '#16a34a' },
+  { text: '  \u2717 [iter  8]  CRASH: 429 Too Many Requests \u2014 CoinGecko', style: 'bold', color: '#dc2626' },
+  { text: '', style: '' },
+  { text: '  Agent stopped at iteration 8. Required: human intervention.', style: 'bold', color: '#dc2626' },
+  { text: '', style: '' },
+  { text: '\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E', style: '', color: '#d97706' },
+  { text: '\u2502  PART 2: With Helix  \u2502', style: '', color: '#d97706' },
+  { text: '\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F', style: '', color: '#d97706' },
+  { text: '', style: '' },
+  { text: '  \u2713 [iter  1]  Alchemy          +0.52%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  2]  CoinGecko        +1.31%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  3]  DefiLlama        -0.18%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  4]  Monad RPC        +0.93%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  5]  Dune Analytics   -0.67%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  6]  CoinGecko        +1.44%', style: '', color: '#16a34a' },
+  { text: '  \u2713 [iter  7]  Alchemy          -0.22%', style: '', color: '#16a34a' },
+  { text: '      \uD83D\uDD0D Perceive: RATE_LIMIT', style: '', color: '#d97706', delay: 600 },
+  { text: '      \uD83D\uDD27 Construct: ["backoff_retry","rotate_api_key"]', style: '', color: '#d97706', delay: 400 },
+  { text: '      \u2696\uFE0F  Evaluate: backoff_retry', style: '', color: '#d97706', delay: 400 },
+  { text: '      \u2705 Commit: saved to gene map', style: '', color: '#16a34a', delay: 400 },
+  { text: '  \u2713 [iter  8]  DefiLlama        +0.74%   \u2190 repaired', style: '', color: '#d97706' },
+  { text: '  \u2713 [iter  9]  Monad RPC        +0.38%', style: '', color: '#16a34a' },
+  { text: '  ...', style: '', color: '#6b5535' },
+  { text: '  \u2713 [iter 40]  CoinGecko        +1.22%', style: '', color: '#16a34a' },
+  { text: '', style: '' },
+  { text: '  Iterations: 40/40  \u00B7  Human interventions: 0  \u00B7  Repairs: 4', style: 'bold', color: '#16a34a' },
+];
+
+var terminal = document.getElementById('terminal');
+var heroSection = document.getElementById('heroSection');
+var codeWrap = document.getElementById('codeWrap');
+var animating = false;
+
+function createCursor() {
+  var c = document.createElement('span');
+  c.className = 'cursor';
+  return c;
+}
+
+function typeLine(line, callback) {
+  var text = line.text;
+  var span = document.createElement('span');
+  if (line.color) span.style.color = line.color;
+  if (line.style === 'bold') span.style.fontWeight = '700';
+  terminal.appendChild(span);
+
+  var cursor = createCursor();
+  terminal.appendChild(cursor);
+
+  if (text === '') {
+    terminal.removeChild(cursor);
+    span.textContent = '\n';
+    callback();
+    return;
+  }
+
+  var charIdx = 0;
+  // Commands type faster, data lines appear instantly for snappiness
+  var isCmd = text.startsWith('>');
+  var charDelay = isCmd ? 40 : 8;
+
+  function typeChar() {
+    if (charIdx < text.length) {
+      span.textContent = text.substring(0, charIdx + 1);
+      charIdx++;
+      terminal.scrollTop = terminal.scrollHeight;
+      setTimeout(typeChar, charDelay);
+    } else {
+      terminal.removeChild(cursor);
+      span.textContent += '\n';
+      terminal.scrollTop = terminal.scrollHeight;
+      callback();
+    }
+  }
+  typeChar();
+}
+
+function runAnimation() {
+  if (animating) return;
+  animating = true;
+  terminal.innerHTML = '';
+  heroSection.classList.remove('visible');
+  codeWrap.classList.remove('visible');
+
+  var lineIdx = 0;
+  function nextLine() {
+    if (lineIdx >= LINES.length) {
+      // Animation done — show hero
+      setTimeout(function() {
+        heroSection.classList.add('visible');
+        codeWrap.classList.add('visible');
+      }, 300);
+      // Loop after 3 seconds
+      setTimeout(function() {
+        animating = false;
+        runAnimation();
+      }, 6000);
+      return;
+    }
+    var line = LINES[lineIdx];
+    var delay = line.delay || 200;
+    lineIdx++;
+    typeLine(line, function() {
+      setTimeout(nextLine, delay);
+    });
+  }
+  nextLine();
+}
+
+runAnimation();
+</script>
+</body>
+</html>

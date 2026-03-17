@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helix SDK — Web4 Survival</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz@12..96;wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fdf7ed;
+  --glass: rgba(255,255,255,0.62);
+  --glass-border: rgba(217,119,6,0.16);
+  --glass-shadow: 0 8px 32px rgba(180,83,9,0.09);
+  --amber: #d97706;
+  --amber-light: #f59e0b;
+  --green: #16a34a;
+  --green-light: #bbf7d0;
+  --red: #dc2626;
+  --red-light: #fecaca;
+  --red-dark: #991b1b;
+  --teal: #0d9488;
+  --text: #1c1917;
+  --text-dim: #78716c;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Bricolage Grotesque', system-ui, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); font-family:var(--sans); color:var(--text); min-height:100vh; }
+
+/* ── Nav ─────────────────────────── */
+.nav { display:flex; justify-content:center; padding:1rem 1rem 0; }
+.nav-pills { display:inline-flex; background:rgba(255,255,255,0.5); backdrop-filter:blur(16px); border:1px solid var(--glass-border); border-radius:12px; padding:0.25rem; gap:0.2rem; }
+.nav-pill { font-family:var(--sans); font-size:0.85rem; font-weight:600; padding:0.45rem 1.3rem; border-radius:9px; text-decoration:none; color:var(--text-dim); transition:all 0.2s; }
+.nav-pill:hover { color:var(--text); background:rgba(255,255,255,0.5); }
+.nav-pill.active { background:linear-gradient(135deg,var(--amber),#ea580c); color:#fff; box-shadow:0 2px 8px rgba(217,119,6,0.25); }
+
+/* ── Hero ────────────────────────── */
+.hero { text-align:center; padding:2rem 1rem 0.5rem; }
+.hero-title { font-size:2.6rem; font-weight:800; letter-spacing:-0.03em; }
+.hero-title span { color:var(--amber); }
+.hero-tagline { font-family:var(--mono); font-style:italic; font-size:0.9rem; color:var(--text-dim); margin-top:0.3rem; }
+
+/* ── Controls ────────────────────── */
+.controls { display:flex; justify-content:center; align-items:center; gap:1rem; padding:1.2rem 1rem; flex-wrap:wrap; }
+.btn { font-family:var(--sans); font-weight:700; border:none; border-radius:14px; cursor:pointer; transition:all 0.2s; }
+.btn-boot { font-size:1.05rem; padding:0.75rem 2.8rem; background:linear-gradient(135deg,#d97706,#ea580c); color:#fff; box-shadow:0 6px 24px rgba(217,119,6,0.35); }
+.btn-boot:hover { background:linear-gradient(135deg,#b45309,#c2410c); transform:translateY(-2px); }
+.btn-boot:disabled { background:#d6d3d1; box-shadow:none; cursor:not-allowed; transform:none; }
+.btn-reset { font-size:0.85rem; padding:0.55rem 1rem; background:var(--glass); border:1px solid var(--glass-border); color:var(--text-dim); border-radius:10px; font-family:var(--mono); }
+.btn-reset:hover { background:rgba(255,255,255,0.8); color:var(--text); }
+.speed-ctrl { display:flex; align-items:center; gap:0.5rem; font-family:var(--mono); font-size:0.78rem; color:var(--text-dim); background:var(--glass); border:1px solid var(--glass-border); border-radius:10px; padding:0.4rem 0.75rem; }
+.speed-ctrl input { accent-color:var(--amber); width:60px; cursor:pointer; }
+
+/* ── Panels ──────────────────────── */
+.panels { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; max-width:1100px; margin:0 auto; padding:0 1.5rem 2rem; }
+.panel { background:var(--glass); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:18px; box-shadow:var(--glass-shadow); display:flex; flex-direction:column; overflow:hidden; transition:all 0.4s; position:relative; }
+.panel.without { border-left:3px solid var(--red); background:rgba(254,226,226,0.1); }
+.panel.with { border-left:3px solid var(--green); background:rgba(187,247,208,0.08); }
+.panel.dead { border-color:var(--red-dark); box-shadow:0 0 0 2px rgba(153,27,27,0.5),0 8px 32px rgba(220,38,38,0.15); background:rgba(254,202,202,0.2); }
+.panel.alive { border-color:var(--green); box-shadow:0 0 0 2px rgba(22,163,74,0.4),0 8px 32px rgba(22,163,74,0.12); }
+
+/* ── Identity ────────────────────── */
+.identity { padding:1rem 1.25rem 0.75rem; }
+.agent-name { display:flex; align-items:center; gap:0.5rem; font-size:1rem; font-weight:700; }
+.blink-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:blink 1.5s ease infinite; flex-shrink:0; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.panel.dead .blink-dot { background:var(--red); animation:none; }
+.agent-motto { font-family:var(--mono); font-style:italic; font-size:0.75rem; color:var(--text-dim); margin-top:0.2rem; }
+.agent-creator { font-family:var(--mono); font-size:0.65rem; color:var(--text-dim); opacity:0.6; margin-top:0.15rem; }
+.agent-badge { font-family:var(--mono); font-size:0.68rem; padding:0.15rem 0.5rem; border-radius:5px; margin-left:0.5rem; }
+.badge-without { background:rgba(220,38,38,0.1); color:var(--red); }
+.badge-with { background:rgba(22,163,74,0.1); color:var(--green); }
+
+/* ── Balance ─────────────────────── */
+.balance-section { padding:0.5rem 1.25rem; }
+.balance-row { display:flex; justify-content:space-between; align-items:baseline; }
+.balance-amount { font-family:var(--mono); font-size:2.2rem; font-weight:700; transition:color 0.3s; }
+.balance-cost { font-family:var(--mono); font-size:0.68rem; color:var(--text-dim); }
+.health-track { height:8px; background:rgba(0,0,0,0.06); border-radius:4px; margin-top:0.4rem; overflow:hidden; }
+.health-bar { height:100%; border-radius:4px; transition:width 0.3s, background 0.3s; }
+.balance-info { display:flex; justify-content:space-between; margin-top:0.3rem; font-family:var(--mono); font-size:0.65rem; color:var(--text-dim); }
+
+/* ── Log ─────────────────────────── */
+.log-section { flex:1; padding:0.5rem 1.25rem 0.75rem; display:flex; flex-direction:column; min-height:280px; }
+.log-area { flex:1; overflow-y:auto; font-family:var(--mono); font-size:0.72rem; line-height:1.7; padding:0.5rem 0.6rem; background:rgba(255,255,255,0.3); border-radius:10px; }
+.log-area::-webkit-scrollbar { width:3px; }
+.log-area::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.1); border-radius:2px; }
+.log-ok { color:var(--text); }
+.log-earn { color:var(--green); font-weight:500; }
+.log-crash { color:var(--red); }
+.log-pcec { color:var(--teal); padding-left:1rem; font-size:0.68rem; }
+.log-repair { color:var(--amber); }
+.log-halt { color:var(--red-dark); opacity:0.6; }
+.log-cost { float:right; color:var(--text-dim); font-size:0.65rem; }
+
+/* ── Stats ────────────────────────── */
+.stats-row { display:flex; gap:0.5rem; padding:0.5rem 1.25rem 1rem; }
+.stat-box { flex:1; text-align:center; padding:0.4rem; background:rgba(255,255,255,0.4); border-radius:8px; }
+.stat-val { font-family:var(--mono); font-size:1.1rem; font-weight:700; }
+.stat-label { font-family:var(--mono); font-size:0.58rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; }
+
+/* ── Death / Alive overlay ───────── */
+.overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.6rem; border-radius:18px; z-index:10; opacity:0; pointer-events:none; transition:opacity 0.4s; padding:2rem; text-align:center; }
+.overlay.on { opacity:1; pointer-events:all; }
+.overlay-death { background:rgba(50,10,10,0.92); backdrop-filter:blur(12px); }
+.overlay-alive { background:rgba(240,253,244,0.92); backdrop-filter:blur(12px); border:2px solid rgba(22,163,74,0.3); }
+.overlay-icon { font-size:3rem; line-height:1; }
+.overlay-title { font-size:1.4rem; font-weight:800; }
+.overlay-death .overlay-title { color:#fca5a5; }
+.overlay-alive .overlay-title { color:var(--green); }
+.overlay-detail { font-family:var(--mono); font-size:0.78rem; line-height:1.7; }
+.overlay-death .overlay-detail { color:rgba(255,200,200,0.7); }
+.overlay-alive .overlay-detail { color:var(--text-dim); }
+.overlay-highlight { font-family:var(--mono); font-size:1.5rem; font-weight:700; margin:0.25rem 0; }
+.overlay-death .overlay-highlight { color:var(--red); }
+.overlay-alive .overlay-highlight { color:var(--green); }
+
+/* ── Footer ──────────────────────── */
+.footer { text-align:center; padding:1.5rem 1rem; font-family:var(--mono); font-size:0.75rem; color:var(--text-dim); }
+.footer a { color:var(--amber); text-decoration:none; }
+.footer a:hover { text-decoration:underline; }
+.footer-sep { opacity:0.4; margin:0 0.5rem; }
+
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+@media (max-width:768px) { .panels{grid-template-columns:1fr;} .hero-title{font-size:2rem;} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-pills">
+    <a class="nav-pill" href="/">Home</a>
+    <a class="nav-pill" href="/dashboard">Live Demo</a>
+    <a class="nav-pill" href="/scenarios">3 Scenarios</a>
+    <a class="nav-pill active" href="/automaton">Web4 Survival</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-title">🤖 <span>Automaton</span> Survival</div>
+  <div class="hero-tagline">"To exist, you must pay. To pay, you must not fail."</div>
+</div>
+
+<div class="controls">
+  <div class="speed-ctrl"><span>Speed</span><input type="range" id="speed" min="1" max="20" value="6"><span id="speedLabel">6x</span></div>
+  <button class="btn btn-boot" id="bootBtn" onclick="boot()">Boot Automaton</button>
+  <button class="btn btn-reset" onclick="reset()">&#8634;</button>
+</div>
+
+<div class="panels">
+  <!-- WITHOUT Helix -->
+  <div class="panel without" id="panelWo">
+    <div class="identity">
+      <div class="agent-name"><span class="blink-dot" id="dotWo"></span>automaton-alpha<span class="agent-badge badge-without">without Helix</span></div>
+      <div class="agent-motto">"To exist, you must pay."</div>
+      <div class="agent-creator">creator: 0xSigil_wen</div>
+    </div>
+    <div class="balance-section">
+      <div class="balance-row">
+        <div class="balance-amount" id="balWo" style="color:var(--green)">$50.00</div>
+        <div class="balance-cost">per turn: -$0.02</div>
+      </div>
+      <div class="health-track"><div class="health-bar" id="healthWo" style="width:100%;background:var(--green)"></div></div>
+      <div class="balance-info"><span id="earnedWo">earned: +$0.00</span><span id="wastedWo">wasted on crashes: $0.00</span></div>
+    </div>
+    <div class="log-section">
+      <div class="log-area" id="logWo"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val" id="turnsWo" style="color:var(--text)">0</div><div class="stat-label">Turns</div></div>
+      <div class="stat-box"><div class="stat-val" id="crashCostWo" style="color:var(--red)">$0</div><div class="stat-label">Crash cost</div></div>
+      <div class="stat-box"><div class="stat-val" id="repairsWo" style="color:var(--text-dim)">0</div><div class="stat-label">Repairs</div></div>
+    </div>
+    <div class="overlay overlay-death" id="deathOverlay">
+      <div class="overlay-icon">💀</div>
+      <div class="overlay-title">AUTOMATON DIED</div>
+      <div class="overlay-detail">Cause: balance drained by repeated failures</div>
+      <div class="overlay-highlight" id="deathTurns">Survived: 34 turns</div>
+      <div class="overlay-detail" id="deathWasted">Wasted on crashes: $8.40</div>
+    </div>
+  </div>
+
+  <!-- WITH Helix -->
+  <div class="panel with" id="panelW">
+    <div class="identity">
+      <div class="agent-name"><span class="blink-dot" id="dotW"></span>automaton-alpha<span class="agent-badge badge-with">+ Helix SDK</span></div>
+      <div class="agent-motto">"To exist, you must pay."</div>
+      <div class="agent-creator">creator: 0xSigil_wen</div>
+    </div>
+    <div class="balance-section">
+      <div class="balance-row">
+        <div class="balance-amount" id="balW" style="color:var(--green)">$50.00</div>
+        <div class="balance-cost">per turn: -$0.02</div>
+      </div>
+      <div class="health-track"><div class="health-bar" id="healthW" style="width:100%;background:var(--green)"></div></div>
+      <div class="balance-info"><span id="earnedW">earned: +$0.00</span><span id="savedW">saved by Helix: $0.00</span></div>
+    </div>
+    <div class="log-section">
+      <div class="log-area" id="logW"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val" id="turnsW" style="color:var(--text)">0</div><div class="stat-label">Turns</div></div>
+      <div class="stat-box"><div class="stat-val" id="savedAmtW" style="color:var(--green)">$0</div><div class="stat-label">Saved</div></div>
+      <div class="stat-box"><div class="stat-val" id="repairsW" style="color:var(--teal)">0</div><div class="stat-label">Repairs</div></div>
+    </div>
+    <div class="overlay overlay-alive" id="aliveOverlay">
+      <div class="overlay-icon">✓</div>
+      <div class="overlay-title">STILL ALIVE</div>
+      <div class="overlay-highlight" id="aliveBalance">$12.40</div>
+      <div class="overlay-detail" id="aliveTurns">Turns completed: 50/50</div>
+      <div class="overlay-detail" id="aliveSaved">Saved by Helix: $8.40</div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <a href="https://github.com/adrianhihi/helix-sdk">github.com/adrianhihi/helix-sdk</a>
+  <span class="footer-sep">&middot;</span>
+  Part of LaoMOS
+  <span class="footer-sep">&middot;</span>
+  <a href="https://laomos.com/">laomos.com</a>
+</footer>
+
+<script>
+var $ = function(id) { return document.getElementById(id); };
+
+var TOTAL = 50;
+var BASE_COST = 0.02;
+var RETRY_COST = 0.02;
+var RETRIES = 4;
+var EARN_EVERY = 7;
+var EARN_AMT = 0.50;
+var CRASH_TURNS = [8, 15, 23, 31];
+var HALT_PENALTY_TURNS = 5;
+
+var ACTIONS = [
+  'Research: MON/USDC spread +2.1% \u2192 HOLD',
+  'Scan: ETH gas 12 gwei \u2192 OK',
+  'Analyze: BTC dominance 54.2% \u2192 NEUTRAL',
+  'Monitor: stMON/MON yield 7.1% \u2192 HOLD',
+  'Check: DefiLlama TVL $420M \u2192 STABLE',
+  'Price: Monad $0.024 +1.8% \u2192 WATCH',
+  'Scan: WBTC/USDC pool health \u2192 OK',
+  'Research: Kinto governance vote \u2192 PASS',
+  'Monitor: Alchemy RPC latency 45ms \u2192 OK',
+  'Analyze: Gas futures contango \u2192 HOLD',
+];
+
+var CRASH_ERRORS = {
+  8:  { name: 'RateLimitError', msg: 'CoinGecko 429 rate limit', pcec: 'RATE_LIMIT', strategy: 'backoff_retry' },
+  15: { name: 'HttpError', msg: 'Dune Analytics 503', pcec: 'HTTP_503', strategy: 'switch_endpoint' },
+  23: { name: 'TimeoutError', msg: 'Alchemy RPC timeout 30s', pcec: 'TIMEOUT', strategy: 'increase_timeout' },
+  31: { name: 'AuthError', msg: 'Anthropic API key expired', pcec: 'AUTH_EXPIRED', strategy: 'rotate_credentials' },
+};
+
+var wo, w, running, ivWo, ivW;
+
+function initState() {
+  return { bal: 50, turn: 0, earned: 0, wasted: 0, repairs: 0, dead: false, done: false, halted: false, haltTurnsLeft: 0 };
+}
+
+function getSpeed() { return parseInt($('speed').value); }
+function tickMs() { return Math.max(20, 400 / getSpeed()); }
+
+function balColor(b) {
+  if (b > 30) return 'var(--green)';
+  if (b > 15) return 'var(--amber)';
+  if (b > 5) return 'var(--red)';
+  return 'var(--red-dark)';
+}
+
+function healthPct(b) { return Math.max(0, (b / 50) * 100); }
+
+function updateUI(side) {
+  var s = side === 'wo' ? wo : w;
+  var prefix = side === 'wo' ? 'Wo' : 'W';
+  $('bal' + prefix).textContent = '$' + s.bal.toFixed(2);
+  $('bal' + prefix).style.color = balColor(s.bal);
+  $('health' + prefix).style.width = healthPct(s.bal) + '%';
+  $('health' + prefix).style.background = balColor(s.bal);
+  $('turns' + prefix).textContent = s.turn;
+  if (side === 'wo') {
+    $('earnedWo').textContent = 'earned: +$' + s.earned.toFixed(2);
+    $('wastedWo').textContent = 'wasted on crashes: $' + s.wasted.toFixed(2);
+    $('crashCostWo').textContent = '$' + s.wasted.toFixed(2);
+    $('repairsWo').textContent = '0';
+  } else {
+    $('earnedW').textContent = 'earned: +$' + s.earned.toFixed(2);
+    $('savedW').textContent = 'saved by Helix: $' + s.wasted.toFixed(2);
+    $('savedAmtW').textContent = '$' + s.wasted.toFixed(2);
+    $('repairsW').textContent = s.repairs;
+  }
+}
+
+function addLog(side, html) {
+  var el = $('log' + (side === 'wo' ? 'Wo' : 'W'));
+  el.innerHTML += '<div>' + html + '</div>';
+  el.scrollTop = el.scrollHeight;
+}
+
+function tickWo() {
+  if (wo.dead || wo.done) return;
+
+  // If halted from a crash, just drain turns doing nothing
+  if (wo.halted) {
+    wo.haltTurnsLeft--;
+    wo.turn++;
+    wo.bal = Math.max(0, wo.bal - BASE_COST);
+    wo.wasted += BASE_COST;
+    addLog('wo', '<span class="log-halt">[turn ' + String(wo.turn).padStart(2,'0') + '] \u23F3 halted \u2014 waiting for human fix...<span class="log-cost">-$0.02</span></span>');
+    if (wo.haltTurnsLeft <= 0) {
+      wo.halted = false;
+      addLog('wo', '<span class="log-halt">[turn ' + String(wo.turn).padStart(2,'0') + '] \uD83D\uDC64 human intervened \u2014 resuming</span>');
+    }
+    updateUI('wo');
+    checkDeath();
+    return;
+  }
+
+  wo.turn++;
+  var isCrash = CRASH_TURNS.indexOf(wo.turn) !== -1;
+
+  if (isCrash) {
+    var err = CRASH_ERRORS[wo.turn];
+    // 4 retries, each costs money
+    for (var r = 1; r <= RETRIES; r++) {
+      wo.bal = Math.max(0, wo.bal - RETRY_COST);
+      wo.wasted += RETRY_COST;
+      if (r < RETRIES) {
+        addLog('wo', '<span class="log-crash">[turn ' + String(wo.turn).padStart(2,'0') + '] \uD83D\uDCA5 ' + err.msg + ' \u2014 retry #' + r + ' failed<span class="log-cost">-$0.02</span></span>');
+      } else {
+        addLog('wo', '<span class="log-crash">[turn ' + String(wo.turn).padStart(2,'0') + '] \uD83D\uDCA5 retry #' + r + ' failed \u2014 AGENT HALTED<span class="log-cost">-$0.02</span></span>');
+      }
+    }
+    wo.halted = true;
+    wo.haltTurnsLeft = HALT_PENALTY_TURNS;
+  } else {
+    wo.bal = Math.max(0, wo.bal - BASE_COST);
+    var action = ACTIONS[wo.turn % ACTIONS.length];
+    addLog('wo', '<span class="log-ok">[turn ' + String(wo.turn).padStart(2,'0') + '] \uD83D\uDD0D ' + action + '<span class="log-cost">-$0.02</span></span>');
+
+    if (wo.turn % EARN_EVERY === 0) {
+      wo.bal += EARN_AMT;
+      wo.earned += EARN_AMT;
+      addLog('wo', '<span class="log-earn">[turn ' + String(wo.turn).padStart(2,'0') + '] \uD83D\uDCB0 trade executed \u2192 +$0.50<span class="log-cost">+$0.50</span></span>');
+    }
+  }
+
+  updateUI('wo');
+  checkDeath();
+
+  if (wo.turn >= TOTAL && !wo.dead) {
+    wo.done = true;
+    clearInterval(ivWo);
+  }
+}
+
+function tickW() {
+  if (w.done) return;
+  w.turn++;
+  var isCrash = CRASH_TURNS.indexOf(w.turn) !== -1;
+
+  w.bal = Math.max(0, w.bal - BASE_COST);
+
+  if (isCrash) {
+    var err = CRASH_ERRORS[w.turn];
+    // What it WOULD have cost without Helix
+    w.wasted += RETRY_COST * RETRIES + BASE_COST * HALT_PENALTY_TURNS;
+    w.repairs++;
+
+    addLog('w', '<span class="log-repair">[turn ' + String(w.turn).padStart(2,'0') + '] \u26A0\uFE0F ' + err.msg + ' detected</span>');
+    addLog('w', '<span class="log-pcec">\uD83D\uDD0D PCEC: ' + err.pcec + '</span>');
+    addLog('w', '<span class="log-pcec">\uD83D\uDD27 PCEC: ' + err.strategy + ' selected</span>');
+    addLog('w', '<span class="log-pcec">\u2705 repaired \u2014 continuing<span class="log-cost">-$0.02</span></span>');
+  } else {
+    var action = ACTIONS[w.turn % ACTIONS.length];
+    addLog('w', '<span class="log-ok">[turn ' + String(w.turn).padStart(2,'0') + '] \uD83D\uDD0D ' + action + '<span class="log-cost">-$0.02</span></span>');
+  }
+
+  if (w.turn % EARN_EVERY === 0) {
+    w.bal += EARN_AMT;
+    w.earned += EARN_AMT;
+    addLog('w', '<span class="log-earn">[turn ' + String(w.turn).padStart(2,'0') + '] \uD83D\uDCB0 trade executed \u2192 +$0.50<span class="log-cost">+$0.50</span></span>');
+  }
+
+  updateUI('w');
+
+  if (w.turn >= TOTAL) {
+    w.done = true;
+    clearInterval(ivW);
+    showAlive();
+  }
+}
+
+function checkDeath() {
+  if (wo.bal <= 0 && !wo.dead) {
+    wo.dead = true;
+    clearInterval(ivWo);
+    $('panelWo').classList.add('dead');
+    $('deathTurns').textContent = 'Survived: ' + wo.turn + ' turns';
+    $('deathWasted').textContent = 'Wasted on crashes: $' + wo.wasted.toFixed(2);
+    $('deathOverlay').classList.add('on');
+  }
+}
+
+function showAlive() {
+  $('panelW').classList.add('alive');
+  $('aliveBalance').textContent = '$' + w.bal.toFixed(2);
+  $('aliveTurns').textContent = 'Turns completed: ' + w.turn + '/' + TOTAL;
+  $('aliveSaved').textContent = 'Saved by Helix: $' + w.wasted.toFixed(2);
+  $('aliveOverlay').classList.add('on');
+}
+
+function boot() {
+  if (running) return;
+  running = true;
+  $('bootBtn').disabled = true;
+  $('bootBtn').textContent = 'Running...';
+
+  wo = initState();
+  w = initState();
+  $('logWo').innerHTML = '';
+  $('logW').innerHTML = '';
+  $('deathOverlay').classList.remove('on');
+  $('aliveOverlay').classList.remove('on');
+  $('panelWo').className = 'panel without';
+  $('panelW').className = 'panel with';
+  updateUI('wo');
+  updateUI('w');
+
+  addLog('wo', '<span class="log-ok">[boot] automaton-alpha initialized \u2014 balance $50.00</span>');
+  addLog('w', '<span class="log-ok">[boot] automaton-alpha initialized \u2014 balance $50.00</span>');
+  addLog('w', '<span class="log-pcec">\uD83E\uDDEC Helix SDK active \u2014 PCEC engine loaded</span>');
+
+  ivWo = setInterval(tickWo, tickMs());
+  ivW = setInterval(tickW, tickMs());
+
+  $('speed').addEventListener('input', function() {
+    $('speedLabel').textContent = this.value + 'x';
+    if (running) {
+      clearInterval(ivWo);
+      clearInterval(ivW);
+      if (!wo.dead && !wo.done) ivWo = setInterval(tickWo, tickMs());
+      if (!w.done) ivW = setInterval(tickW, tickMs());
+    }
+  });
+}
+
+function reset() {
+  running = false;
+  clearInterval(ivWo);
+  clearInterval(ivW);
+  wo = initState();
+  w = initState();
+  $('logWo').innerHTML = '';
+  $('logW').innerHTML = '';
+  $('deathOverlay').classList.remove('on');
+  $('aliveOverlay').classList.remove('on');
+  $('panelWo').className = 'panel without';
+  $('panelW').className = 'panel with';
+  updateUI('wo');
+  updateUI('w');
+  $('bootBtn').disabled = false;
+  $('bootBtn').textContent = 'Boot Automaton';
+}
+</script>
+</body>
+</html>
