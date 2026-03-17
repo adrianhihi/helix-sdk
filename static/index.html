@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helix SDK — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf7ed;
+    --glass: rgba(255,255,255,0.62);
+    --glass-border: rgba(217,119,6,0.16);
+    --glass-shadow: 0 8px 32px rgba(180,83,9,0.09);
+    --amber: #d97706;
+    --amber-light: #f59e0b;
+    --green: #16a34a;
+    --green-light: #bbf7d0;
+    --red: #dc2626;
+    --red-light: #fecaca;
+    --teal: #0d9488;
+    --teal-light: #ccfbf1;
+    --text: #1c1917;
+    --text-dim: #78716c;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Bricolage Grotesque', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ────────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 1rem;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header h1 span { color: var(--amber); }
+  header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+  }
+
+  /* ── Run button ────────────────────────────── */
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .btn {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.7rem 2.4rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #d97706, #ea580c);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(217,119,6,0.3);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #b45309, #c2410c);
+    box-shadow: 0 6px 20px rgba(217,119,6,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    background: #d6d3d1;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── Panels ────────────────────────────────── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2rem;
+  }
+  .panel {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: var(--glass-shadow);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 540px;
+    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .panel.crashed {
+    border-color: var(--red);
+    box-shadow: 0 0 24px rgba(220,38,38,0.18);
+    background: rgba(254,202,202,0.2);
+  }
+  .panel.completed {
+    border-color: var(--green);
+    box-shadow: 0 0 24px rgba(22,163,74,0.15);
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .panel-badge {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 6px;
+    background: #e7e5e4;
+    color: var(--text-dim);
+  }
+  .panel-badge.active {
+    background: var(--amber-light);
+    color: #92400e;
+  }
+  .panel-badge.crashed-badge {
+    background: var(--red);
+    color: #fff;
+    animation: pulse 1.5s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ── Progress bar ──────────────────────────── */
+  .progress-track {
+    height: 6px;
+    background: #e7e5e4;
+    border-radius: 3px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .panel.crashed .progress-bar { background: var(--red); }
+
+  /* ── Metrics row ───────────────────────────── */
+  .metrics {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .metric {
+    flex: 1;
+    background: rgba(255,255,255,0.5);
+    border-radius: 10px;
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+  }
+  .metric-value {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .metric-label {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Log area ──────────────────────────────── */
+  .log-area {
+    flex: 1;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.65;
+    padding: 0.5rem 0.65rem;
+    background: rgba(255,255,255,0.35);
+    border-radius: 10px;
+  }
+  .log-line {
+    white-space: nowrap;
+    animation: fadeIn 0.15s ease;
+  }
+  .log-line.ok { color: var(--text); }
+  .log-line.crash { color: var(--red); font-weight: 600; }
+  .log-line.repaired { color: var(--teal); }
+  .log-line.pcec {
+    color: var(--teal);
+    padding-left: 1.5rem;
+    font-size: 0.72rem;
+    opacity: 0.85;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Crash banner ──────────────────────────── */
+  .crash-banner {
+    background: var(--red);
+    color: #fff;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 10px;
+    margin-top: 0.75rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    animation: shake 0.4s ease;
+  }
+  .crash-banner small {
+    font-weight: 400;
+    opacity: 0.9;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* ── PCEC indicator ────────────────────────── */
+  .pcec-indicator {
+    display: none;
+    gap: 0.2rem;
+    margin: 0.5rem 0;
+    padding: 0.55rem 0.75rem;
+    background: rgba(13,148,136,0.08);
+    border: 1px solid rgba(13,148,136,0.2);
+    border-radius: 10px;
+    transition: opacity 0.4s;
+  }
+  .pcec-indicator.active { display: flex; flex-direction: column; }
+  .pcec-indicator.fading { opacity: 0; }
+  .pcec-step {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--text-dim);
+    padding: 0.12rem 0;
+    opacity: 0.35;
+    transition: all 0.25s;
+  }
+  .pcec-step.done {
+    opacity: 1;
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  /* ── Summary section ───────────────────────── */
+  .summary-section {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto 1.5rem;
+    padding: 0 1.5rem;
+  }
+  .summary-section.visible { display: block; }
+  .summary-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .summary-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+  }
+  .summary-card h3 {
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+    color: var(--text-dim);
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .val { font-weight: 700; }
+  .summary-row .val.red { color: var(--red); }
+  .summary-row .val.green { color: var(--green); }
+  .summary-row .val.teal { color: var(--teal); }
+
+  /* ── Gene Map table ────────────────────────── */
+  .gene-map-section {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    padding: 0 1.5rem;
+  }
+  .gene-map-section.visible { display: block; }
+  .gene-map-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .gene-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .gene-table th {
+    background: rgba(13,148,136,0.1);
+    text-align: left;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    color: var(--teal);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .gene-table td {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .gene-table tr:hover td {
+    background: rgba(13,148,136,0.04);
+  }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+  .tag-error { background: var(--red-light); color: var(--red); }
+  .tag-strategy { background: var(--teal-light); color: var(--teal); }
+
+  /* ── Responsive ────────────────────────────── */
+  @media (max-width: 768px) {
+    .panels, .summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧬 <span>Helix</span> SDK</h1>
+  <p>Self-repairing agent wrapper — live PCEC demo</p>
+</header>
+
+<div class="actions">
+  <button class="btn btn-primary" id="runBtn" onclick="runDemo()">Run Demo</button>
+</div>
+
+<div class="panels">
+  <!-- Part 1: Without Helix -->
+  <div class="panel" id="panel1">
+    <div class="panel-header">
+      <span class="panel-title">⚠️ Without Helix</span>
+      <span class="panel-badge" id="badge1">waiting</span>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progress1"></div></div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-value" id="completed1">0</div>
+        <div class="metric-label">Completed</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="crashes1" style="color:var(--red)">0</div>
+        <div class="metric-label">Crashes</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="status1" style="color:var(--text-dim)">—</div>
+        <div class="metric-label">Status</div>
+      </div>
+    </div>
+    <div class="log-area" id="log1"></div>
+    <div id="crashBanner1"></div>
+  </div>
+
+  <!-- Part 2: With Helix -->
+  <div class="panel" id="panel2">
+    <div class="panel-header">
+      <span class="panel-title">🧬 With Helix</span>
+      <span class="panel-badge" id="badge2">waiting</span>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progress2"></div></div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-value" id="completed2">0</div>
+        <div class="metric-label">Completed</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="repairs2" style="color:var(--teal)">0</div>
+        <div class="metric-label">Repairs</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="status2" style="color:var(--text-dim)">—</div>
+        <div class="metric-label">Status</div>
+      </div>
+    </div>
+    <div class="pcec-indicator" id="pcecIndicator">
+      <div class="pcec-step" id="pcec-perceive">🔍 Perceive</div>
+      <div class="pcec-step" id="pcec-construct">🔧 Construct</div>
+      <div class="pcec-step" id="pcec-evaluate">⚖️ Evaluate</div>
+      <div class="pcec-step" id="pcec-commit">✅ Commit</div>
+    </div>
+    <div class="log-area" id="log2"></div>
+  </div>
+</div>
+
+<!-- Summary comparison -->
+<div class="summary-section" id="summarySection">
+  <h2>📊 Comparison</h2>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <h3>⚠️ Part 1 — Without Helix</h3>
+      <div class="summary-row"><span>Iterations completed</span><span class="val red" id="sum1-completed">—</span></div>
+      <div class="summary-row"><span>Human interventions</span><span class="val red" id="sum1-human">—</span></div>
+      <div class="summary-row"><span>Auto-repairs</span><span class="val" id="sum1-repairs">0</span></div>
+    </div>
+    <div class="summary-card">
+      <h3>🧬 Part 2 — With Helix</h3>
+      <div class="summary-row"><span>Iterations completed</span><span class="val green" id="sum2-completed">—</span></div>
+      <div class="summary-row"><span>Human interventions</span><span class="val green" id="sum2-human">—</span></div>
+      <div class="summary-row"><span>Auto-repairs</span><span class="val teal" id="sum2-repairs">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Gene Map table -->
+<div class="gene-map-section" id="geneMapSection">
+  <h2>🗄️ Gene Map — Stored Repairs</h2>
+  <table class="gene-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Error Type</th>
+        <th>Strategy</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody id="geneMapBody"></tbody>
+  </table>
+</div>
+
+<script>
+const TOTAL = 40;
+let state = {
+  completed1: 0, crashes1: 0, repairs1: 0,
+  completed2: 0, crashes2: 0, repairs2: 0,
+  iter1: 0, iter2: 0,
+};
+
+function $(id) { return document.getElementById(id); }
+
+function addLog(panelNum, text, cls) {
+  const log = $('log' + panelNum);
+  const line = document.createElement('div');
+  line.className = 'log-line ' + cls;
+  line.textContent = text;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+function updateMetrics(part) {
+  $('completed' + part).textContent = state['completed' + part];
+  if (part === 1) {
+    $('crashes1').textContent = state.crashes1;
+  } else {
+    $('repairs2').textContent = state.repairs2;
+  }
+  const itersDone = state['iter' + part];
+  $('progress' + part).style.width = ((itersDone / TOTAL) * 100) + '%';
+}
+
+function resetPCEC() {
+  ['perceive', 'construct', 'evaluate', 'commit'].forEach(s => {
+    $('pcec-' + s).className = 'pcec-step';
+    $('pcec-' + s).textContent = {
+      perceive: '🔍 Perceive', construct: '🔧 Construct',
+      evaluate: '⚖️ Evaluate', commit: '✅ Commit'
+    }[s];
+  });
+}
+
+function runDemo() {
+  // Reset UI
+  const btn = $('runBtn');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  $('log1').innerHTML = '';
+  $('log2').innerHTML = '';
+  $('crashBanner1').innerHTML = '';
+  $('panel1').className = 'panel';
+  $('panel2').className = 'panel';
+  $('summarySection').className = 'summary-section';
+  $('geneMapSection').className = 'gene-map-section';
+  $('geneMapBody').innerHTML = '';
+  $('pcecIndicator').className = 'pcec-indicator';
+  resetPCEC();
+  state = { completed1: 0, crashes1: 0, repairs1: 0, completed2: 0, crashes2: 0, repairs2: 0, iter1: 0, iter2: 0 };
+  $('status1').textContent = '—';
+  $('status1').style.color = 'var(--text-dim)';
+  $('status2').textContent = '—';
+  $('status2').style.color = 'var(--text-dim)';
+  updateMetrics(1);
+  updateMetrics(2);
+  $('badge1').textContent = 'waiting';
+  $('badge1').className = 'panel-badge';
+  $('badge2').textContent = 'waiting';
+  $('badge2').className = 'panel-badge';
+
+  const es = new EventSource('/api/helix/stream');
+
+  es.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+
+    switch (d.type) {
+      case 'part':
+        $('badge' + d.part).textContent = 'running';
+        $('badge' + d.part).className = 'panel-badge active';
+        $('status' + d.part).textContent = 'live';
+        $('status' + d.part).style.color = 'var(--amber)';
+        break;
+
+      case 'iter': {
+        state['iter' + d.part] = d.iter;
+        if (d.status === 'ok') {
+          addLog(d.part, '\u2713 [iter ' + String(d.iter).padStart(2, '0') + ']  ' + d.source.padEnd(16) + ' ' + d.delta, 'ok');
+          state['completed' + d.part]++;
+        } else if (d.status === 'crash') {
+          addLog(d.part, '\u2717 [iter ' + String(d.iter).padStart(2, '0') + ']  CRASH', 'crash');
+          state['crashes' + d.part]++;
+        } else if (d.status === 'repaired') {
+          addLog(d.part, '\u21BA [iter ' + String(d.iter).padStart(2, '0') + ']  ' + d.source.padEnd(16) + ' ' + d.delta, 'repaired');
+          state['completed' + d.part]++;
+          state['repairs' + d.part]++;
+          // Fade out PCEC indicator
+          $('pcecIndicator').classList.add('fading');
+          setTimeout(() => {
+            $('pcecIndicator').className = 'pcec-indicator';
+            resetPCEC();
+          }, 400);
+        }
+        updateMetrics(d.part);
+        break;
+      }
+
+      case 'crash':
+        $('panel1').className = 'panel crashed';
+        $('crashBanner1').innerHTML = '<div class="crash-banner">\uD83D\uDCA5 Agent crashed at iteration ' + d.iter + '<br><small>' + d.message + '</small></div>';
+        $('badge1').textContent = 'Human Intervention Required';
+        $('badge1').className = 'panel-badge crashed-badge';
+        $('status1').textContent = 'halted';
+        $('status1').style.color = 'var(--red)';
+        break;
+
+      case 'pcec_step':
+        $('pcecIndicator').className = 'pcec-indicator active';
+        $('pcec-' + d.step).className = 'pcec-step done';
+        $('pcec-' + d.step).textContent = {
+          perceive: '\uD83D\uDD0D Perceive: ' + d.value,
+          construct: '\uD83D\uDD27 Construct: ' + d.value,
+          evaluate: '\u2696\uFE0F Evaluate: ' + d.value,
+          commit: '\u2705 Commit: ' + d.value,
+        }[d.step];
+        addLog(2, '  ' + {
+          perceive: '\uD83D\uDD0D ' + d.value,
+          construct: '\uD83D\uDD27 ' + d.value,
+          evaluate: '\u2696\uFE0F ' + d.value,
+          commit: '\u2705 ' + d.value,
+        }[d.step], 'pcec');
+        break;
+
+      case 'repair_done':
+        break;
+
+      case 'part_summary':
+        if (d.part === 1) {
+          $('badge1').textContent = d.humanInterventions > 0 ? 'Human Intervention Required' : 'done';
+          if (d.humanInterventions > 0) {
+            $('badge1').className = 'panel-badge crashed-badge';
+          }
+          $('sum1-completed').textContent = d.completed + ' / ' + d.total;
+          $('sum1-human').textContent = d.humanInterventions;
+          $('sum1-repairs').textContent = d.autoRepairs;
+        } else {
+          $('badge2').textContent = 'done';
+          $('badge2').className = 'panel-badge';
+          $('panel2').className = 'panel completed';
+          $('status2').textContent = 'done';
+          $('status2').style.color = 'var(--green)';
+          $('sum2-completed').textContent = d.completed + ' / ' + d.total;
+          $('sum2-human').textContent = d.humanInterventions;
+          $('sum2-repairs').textContent = d.autoRepairs;
+        }
+        break;
+
+      case 'gene_map': {
+        const tbody = $('geneMapBody');
+        d.repairs.forEach(function(r) {
+          const tr = document.createElement('tr');
+          const ts = r.createdAt.replace('T', ' ').replace(/\.\d+Z$/, '');
+          tr.innerHTML =
+            '<td>' + r.id + '</td>' +
+            '<td><span class="tag tag-error">' + r.errorType + '</span></td>' +
+            '<td><span class="tag tag-strategy">' + r.repairStrategy + '</span></td>' +
+            '<td style="color:var(--text-dim)">' + ts + '</td>';
+          tbody.appendChild(tr);
+        });
+        $('summarySection').className = 'summary-section visible';
+        $('geneMapSection').className = 'gene-map-section visible';
+        break;
+      }
+
+      case 'done':
+        es.close();
+        btn.disabled = false;
+        btn.textContent = 'Run Again';
+        break;
+    }
+  };
+
+  es.onerror = function() {
+    es.close();
+    btn.disabled = false;
+    btn.textContent = 'Run Demo';
+  };
+}
+</script>
+</body>
+</html>

@@ -1,21 +1,35 @@
 {
   "name": "@helix/sdk",
   "version": "0.1.0",
-  "description": "Helix SDK — self-repairing agent wrapper with PCEC engine",
+  "description": "Two lines of code. Your agent never halts again.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "LaoMOS",
+  "license": "MIT",
+  "homepage": "https://laomos.ai",
+  "keywords": ["agent", "self-repair", "pcec", "gene-map", "ai", "crypto", "helix"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CarbonSiliconAI/helix-sdk"
+  },
   "scripts": {
     "build": "tsc",
-    "demo": "ts-node demo.ts"
+    "demo": "ts-node demo.ts",
+    "server": "ts-node src/server.ts",
+    "dev": "ts-node src/server.ts"
   },
   "bin": {
     "helix-demo": "npx ts-node demo.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^11.7.0"
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.10.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"

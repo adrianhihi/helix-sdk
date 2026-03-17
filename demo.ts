@@ -191,7 +191,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.log(`\n${BOLD}${TEAL}@helix/sdk${RESET} ${DIM}— self-repairing agent demo${RESET}`);
+  console.log(`\n${DIM}helix v0.1.0 — github.com/CarbonSiliconAI/helix-sdk${RESET}`);
+  console.log(`${BOLD}${TEAL}@helix/sdk${RESET} ${DIM}— self-repairing agent demo${RESET}`);
 
   await runWithoutHelix();
   await sleep(500);
