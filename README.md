@@ -65,6 +65,8 @@ npx ts-node demo.ts --show-map
 ```
 
 ## What the demo shows
+<img width="1203" height="637" alt="Screenshot 2026-03-16 at 8 33 29 PM" src="https://github.com/user-attachments/assets/9f18302b-201d-4cbb-989e-affe382488bc" />
+
 
 | | Without Helix | With Helix |
 |---|---|---|
@@ -74,6 +76,8 @@ npx ts-node demo.ts --show-map
 | Agent status | halted | **running** |
 
 ## Gene Map
+<img width="459" height="701" alt="Screenshot 2026-03-16 at 8 35 46 PM" src="https://github.com/user-attachments/assets/18e5efb3-61ac-4425-9bf3-694f0edf68ab" />
+
 
 Every repair is stored permanently in `~/.helix/gene_map.db`.
 
