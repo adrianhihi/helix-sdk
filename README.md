@@ -103,5 +103,5 @@ every team's immunity.
 
 ---
 
-**Part of [LaoMOS](https://laomos.ai) — the AI agent operating system.**
+**Part of [LaoMOS](https://laomos.com) — the AI agent operating system.**
 *Autonomous agents that self-repair, evolve, and share immunity.*
