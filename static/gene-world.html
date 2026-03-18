@@ -394,43 +394,41 @@ function shade(hex, amt) {
   return `rgb(${r},${g},${b})`;
 }
 
-function isoBox(x, y, z, w, h, d, color, alpha) {
-  alpha = alpha || 1;
-  const top = shade(color, 30);
-  const right = shade(color, -30);
-  const left = shade(color, -60);
-
-  const p = [
-    iso(x, y, z + d),       // 0 top-front-left
-    iso(x + w, y, z + d),   // 1 top-front-right
-    iso(x + w, y + h, z + d), // 2 top-back-right
-    iso(x, y + h, z + d),   // 3 top-back-left
-    iso(x, y, z),           // 4 bot-front-left
-    iso(x + w, y, z),       // 5 bot-front-right
-    iso(x + w, y + h, z),   // 6 bot-back-right
-    iso(x, y + h, z),       // 7 bot-back-left
-  ];
-
-  ctx.globalAlpha = alpha;
-
-  // Top face
+function isoBox(x, y, z, w, h, d, ct, cl, cr) {
+  // If cl/cr not provided, derive from ct as a single color
+  if (cl === undefined || typeof cl === 'number') {
+    const alpha = (typeof cl === 'number') ? cl : 1;
+    const base = ct;
+    ct = shade(base, 30);
+    cl = shade(base, -60);
+    cr = shade(base, -30);
+    ctx.globalAlpha = alpha;
+  }
+  // top face
+  const p00 = iso(x,   y,   z+d);
+  const p10 = iso(x+w, y,   z+d);
+  const p11 = iso(x+w, y+h, z+d);
+  const p01 = iso(x,   y+h, z+d);
   ctx.beginPath();
-  ctx.moveTo(p[0].x, p[0].y); ctx.lineTo(p[1].x, p[1].y);
-  ctx.lineTo(p[2].x, p[2].y); ctx.lineTo(p[3].x, p[3].y);
-  ctx.closePath(); ctx.fillStyle = top; ctx.fill();
-
-  // Right face
+  ctx.moveTo(p00.x,p00.y); ctx.lineTo(p10.x,p10.y);
+  ctx.lineTo(p11.x,p11.y); ctx.lineTo(p01.x,p01.y);
+  ctx.closePath(); ctx.fillStyle=ct; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.lineWidth=0.4; ctx.stroke();
+  // left face
+  const b00 = iso(x,   y,   z);
+  const b01 = iso(x,   y+h, z);
   ctx.beginPath();
-  ctx.moveTo(p[1].x, p[1].y); ctx.lineTo(p[5].x, p[5].y);
-  ctx.lineTo(p[6].x, p[6].y); ctx.lineTo(p[2].x, p[2].y);
-  ctx.closePath(); ctx.fillStyle = right; ctx.fill();
-
-  // Left face
+  ctx.moveTo(p00.x,p00.y); ctx.lineTo(p01.x,p01.y);
+  ctx.lineTo(b01.x,b01.y); ctx.lineTo(b00.x,b00.y);
+  ctx.closePath(); ctx.fillStyle=cl; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=0.4; ctx.stroke();
+  // right face
+  const b10 = iso(x+w, y,   z);
   ctx.beginPath();
-  ctx.moveTo(p[0].x, p[0].y); ctx.lineTo(p[4].x, p[4].y);
-  ctx.lineTo(p[7].x, p[7].y); ctx.lineTo(p[3].x, p[3].y);
-  ctx.closePath(); ctx.fillStyle = left; ctx.fill();
-
+  ctx.moveTo(p00.x,p00.y); ctx.lineTo(p10.x,p10.y);
+  ctx.lineTo(b10.x,b10.y); ctx.lineTo(b00.x,b00.y);
+  ctx.closePath(); ctx.fillStyle=cr; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=0.4; ctx.stroke();
   ctx.globalAlpha = 1;
 }
 
@@ -508,129 +506,201 @@ function drawFloor() {
 }
 
 function drawGeneLibrary(t) {
-  // Base pedestal
-  isoBox(-15, -15, 0, 30, 30, 8, '#134e4a', 0.8);
-  // Core
-  isoBox(-10, -10, 8, 20, 20, 30, '#0d9488', 0.6);
+  // Foundation / platform
+  isoBox(-18, -18, 0, 36, 36, 3, '#1e1b4b', shade('#1e1b4b',-20), shade('#1e1b4b',-10));
 
-  // DNA helix
-  const cx = iso(0, 0, 38);
+  // Main walls
+  isoBox(-14, -14, 3, 28, 28, 32, '#312e81', shade('#312e81',-25), shade('#312e81',-15));
+
+  // Roof — slightly overhanging
+  isoBox(-16, -16, 35, 32, 32, 4, '#4338ca', shade('#4338ca',-20), shade('#4338ca',-10));
+
+  // Roof peak
+  isoBox(-10, -10, 39, 20, 20, 6, '#4f46e5', shade('#4f46e5',-15), shade('#4f46e5',-8));
+
+  // Windows — front face (3 windows)
+  isoBox(-10, -14.5, 12, 5, 0.6, 8, '#818cf8', '#6366f1', '#818cf8');
+  isoBox(-2.5, -14.5, 12, 5, 0.6, 8, '#818cf8', '#6366f1', '#818cf8');
+  isoBox(5, -14.5, 12, 5, 0.6, 8, '#818cf8', '#6366f1', '#818cf8');
+
+  // Windows — side face (2 windows)
+  isoBox(-14.5, -8, 12, 0.6, 5, 8, '#818cf8', '#818cf8', '#6366f1');
+  isoBox(-14.5, 3, 12, 0.6, 5, 8, '#818cf8', '#818cf8', '#6366f1');
+
+  // Door
+  isoBox(-3, -14.8, 3, 6, 0.8, 10, '#a78bfa', '#7c3aed', '#a78bfa');
+
+  // Window glow — pulsing
+  const glow = 0.15 + Math.sin(t * 2) * 0.08;
+  const wc = iso(-2.5, -14.5, 16);
+  ctx.beginPath();
+  ctx.arc(wc.x, wc.y, 20 * cam.zoom, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(129,140,248,${glow})`;
+  ctx.fill();
+
+  // DNA helix floating above building
   geneLib.dnaAngle += 0.03;
-  for (let i = 0; i < 12; i++) {
-    const a = geneLib.dnaAngle + i * 0.5;
-    const r = 8;
+  for (let i = 0; i < 10; i++) {
+    const a = geneLib.dnaAngle + i * 0.55;
+    const r = 6;
     const dx = Math.cos(a) * r;
     const dy = Math.sin(a) * 2;
-    const dz = i * 3 - 18;
-    const p = iso(dx, dy, 38 + dz);
+    const dz = i * 2.5 - 12;
+    const p = iso(dx, dy, 50 + dz);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = i % 2 === 0 ? '#14b8a6' : '#2dd4bf';
-    ctx.globalAlpha = 0.8;
+    ctx.arc(p.x, p.y, 2.5 * cam.zoom, 0, Math.PI * 2);
+    ctx.fillStyle = i % 2 === 0 ? '#a78bfa' : '#c4b5fd';
+    ctx.globalAlpha = 0.85;
     ctx.fill();
-    ctx.globalAlpha = 1;
-    // Connecting line
+    // Mirror strand
     const dx2 = Math.cos(a + Math.PI) * r;
     const dy2 = Math.sin(a + Math.PI) * 2;
-    const p2 = iso(dx2, dy2, 38 + dz);
+    const p2 = iso(dx2, dy2, 50 + dz);
     ctx.beginPath();
-    ctx.arc(p2.x, p2.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = i % 2 === 0 ? '#5eead4' : '#99f6e4';
-    ctx.globalAlpha = 0.6;
+    ctx.arc(p2.x, p2.y, 2.5 * cam.zoom, 0, Math.PI * 2);
+    ctx.fillStyle = i % 2 === 0 ? '#818cf8' : '#a5b4fc';
     ctx.fill();
-    ctx.globalAlpha = 1;
     // Bridge
     ctx.beginPath();
     ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = 'rgba(94,234,212,0.25)';
+    ctx.strokeStyle = 'rgba(165,180,252,0.3)';
     ctx.lineWidth = 1;
     ctx.stroke();
+    ctx.globalAlpha = 1;
   }
 
   // Label
-  ctx.font = '600 9px "DM Mono", monospace';
-  ctx.fillStyle = '#14b8a6';
+  const lp = iso(0, 0, 72);
+  ctx.font = `bold ${Math.round(10 * cam.zoom)}px "DM Mono", monospace`;
+  ctx.fillStyle = '#a78bfa';
   ctx.textAlign = 'center';
-  const lp = iso(0, 0, 58);
   ctx.fillText('GENE LIBRARY', lp.x, lp.y);
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.font = '400 8px "DM Mono", monospace';
-  ctx.fillText(geneLib.capsules + ' capsules', lp.x, lp.y + 12);
+  ctx.font = `${Math.round(8 * cam.zoom)}px "DM Mono", monospace`;
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillText(geneLib.capsules + ' capsules', lp.x, lp.y + 13);
 }
 
 function drawAgent(agent, t) {
-  const { pos, color, label, state, walkT, walkDir } = agent;
+  const { pos, color, label, state, walkT } = agent;
   let drawX = pos.x, drawY = pos.y, drawZ = 0;
+  const walking = state === 'walking-to-lib' || state === 'walking-back';
 
   // Walk animation toward gene library
   if (state === 'walking-to-lib') {
     const progress = walkT;
     drawX = pos.x * (1 - progress);
     drawY = pos.y * (1 - progress);
-    drawZ = Math.sin(progress * Math.PI) * 15; // arc
   } else if (state === 'walking-back') {
     const progress = walkT;
     drawX = pos.x * progress;
     drawY = pos.y * progress;
-    drawZ = Math.sin(progress * Math.PI) * 15;
   }
 
-  // Desk
-  isoBox(pos.x - 12, pos.y - 8, 0, 24, 16, 10, '#1e293b', 0.7);
+  const col = state === 'error' ? '#ef4444' : color;
+  const bob = state === 'working' ? Math.sin(t * 3 + pos.x) * 0.5 : 0;
+  const lk = walking ? Math.sin(t * 8) * 1.2 : 0;
 
-  // Worker body (at walk position)
-  const headZ = drawZ + 18;
-  const bodyZ = drawZ + 10;
-  const p = iso(drawX, drawY, bodyZ);
-  const hp = iso(drawX, drawY, headZ);
-
-  // Body
-  ctx.beginPath();
-  ctx.moveTo(p.x - 5, p.y + 4); ctx.lineTo(p.x, p.y - 4); ctx.lineTo(p.x + 5, p.y + 4);
-  ctx.closePath();
-  ctx.fillStyle = state === 'error' ? '#ef4444' : state === 'working' ? color : shade(color, -40);
-  ctx.globalAlpha = 0.9;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Head
-  ctx.beginPath();
-  ctx.arc(hp.x, hp.y, 4, 0, Math.PI * 2);
-  ctx.fillStyle = state === 'error' ? '#fca5a5' : '#e2e8f0';
-  ctx.fill();
-
-  // Glow when working
+  // Desk (always at home position)
+  isoBox(pos.x - 12, pos.y - 8, 0, 24, 16, 6, '#1e293b', shade('#1e293b',-20), shade('#1e293b',-10));
+  // Monitor on desk
+  isoBox(pos.x - 4, pos.y - 6, 6, 8, 2, 6, '#334155', shade('#334155',-15), shade('#334155',-8));
+  // Screen glow
   if (state === 'working') {
+    isoBox(pos.x - 3.5, pos.y - 6.2, 7, 7, 0.3, 4, col, shade(col,-10), col);
+  }
+
+  // Shadow under worker
+  const sp = iso(drawX, drawY, 0);
+  ctx.beginPath();
+  ctx.ellipse(sp.x, sp.y, 10 * cam.zoom, 5 * cam.zoom, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fill();
+
+  // Helper: draw box relative to worker
+  function mkBox(dx, dy, dz, w, d, h, ct, cl, cr) {
+    isoBox(drawX+dx, drawY+dy, drawZ+dz+bob, w, d, h, ct, cl, cr);
+  }
+
+  // ── Minecraft-style blocky character ──
+
+  // Shoes
+  mkBox(-2.2, -1.5, 0, 2.2, 2.2, 1,  '#111827', '#080f1a', '#0d1424');
+  mkBox(0.6,  -1.5, 0, 2.2, 2.2, 1,  '#111827', '#080f1a', '#0d1424');
+
+  // Legs (pants) — animated when walking
+  const ll = lk, rl = -lk;
+  mkBox(-2, -1.2, 1+ll, 2, 2, 4,  '#1e3a5f', shade('#1e3a5f',-20), shade('#1e3a5f',-10));
+  mkBox(0.6, -1.2, 1+rl, 2, 2, 4, '#1e3a5f', shade('#1e3a5f',-20), shade('#1e3a5f',-10));
+
+  // Body (shirt in agent color)
+  const bodyCol = col;
+  mkBox(-2.5, -1.5, 5, 5.6, 3.4, 5, bodyCol, shade(bodyCol,-25), shade(bodyCol,-15));
+
+  // Arms — swing when walking
+  const ak = walking ? Math.sin(t*8)*1.2 : state==='working' ? Math.sin(t*3)*0.8 : 0;
+  mkBox(-3.8, -1, 6+ak,  1.4, 2, 3.6, shade(bodyCol,10), shade(bodyCol,-10), bodyCol);
+  mkBox(3,    -1, 6-ak,  1.4, 2, 3.6, shade(bodyCol,10), shade(bodyCol,-10), bodyCol);
+
+  // Head (skin tone)
+  const sk = '#fde8c8';
+  mkBox(-1.8, -1.6, 10, 4.4, 3.4, 4, sk, shade(sk,-15), shade(sk,-8));
+
+  // Hair (same as shirt color, slightly bigger)
+  mkBox(-2, -1.8, 13.5, 4.8, 3.8, 1.2, bodyCol, shade(bodyCol,-30), shade(bodyCol,-20));
+
+  // Eyes (drawn as small filled rects on face)
+  const ep = iso(drawX + 0.4, drawY - 1.7, drawZ + bob + 12);
+  ctx.fillStyle = '#0f172a';
+  const es = Math.max(1, 2.5 * cam.zoom);
+  ctx.fillRect(ep.x - es*1.8, ep.y - es*0.5, es, es*1.2);
+  ctx.fillRect(ep.x + es*0.8, ep.y - es*0.5, es, es*1.2);
+
+  // Error pulse ring
+  if (state === 'error') {
+    const rp = iso(drawX, drawY, drawZ + bob + 8);
+    const pulse = 0.8 + Math.sin(t * 7) * 0.2;
     ctx.beginPath();
-    ctx.arc(hp.x, hp.y, 12 + Math.sin(t * 4) * 3, 0, Math.PI * 2);
-    ctx.fillStyle = color.replace(')', ',0.1)').replace('rgb', 'rgba');
+    ctx.arc(rp.x, rp.y, 22 * cam.zoom * pulse, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(239,68,68,0.65)';
+    ctx.lineWidth = 2.5; ctx.stroke();
+  }
+
+  // Working glow
+  if (state === 'working') {
+    const wp = iso(drawX, drawY, drawZ + bob + 8);
+    ctx.beginPath();
+    ctx.arc(wp.x, wp.y, 18 * cam.zoom, 0, Math.PI*2);
+    ctx.fillStyle = col.startsWith('#') ? col + '18' : 'rgba(255,255,255,0.1)';
     ctx.fill();
   }
 
-  // Error pulse
-  if (state === 'error') {
-    ctx.beginPath();
-    ctx.arc(hp.x, hp.y, 16 + Math.sin(t * 8) * 4, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(239,68,68,0.4)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+  // State label above head
+  const stateLabel = state === 'error' ? '⚠ ERROR' :
+                     walking ? '→ GENE LAB' :
+                     state === 'working' ? '● WORKING' : '';
+  const stateCol = state === 'error' ? '#f87171' :
+                   walking ? '#a78bfa' : '#fbbf24';
+
+  if (stateLabel && cam.zoom > 0.5) {
+    const lp = iso(drawX, drawY, drawZ + bob + 18);
+    ctx.font = `bold ${Math.round(9 * cam.zoom * 0.7)}px "DM Mono", monospace`;
+    ctx.textAlign = 'center';
+    const tw2 = ctx.measureText(stateLabel).width;
+    ctx.fillStyle = 'rgba(15,23,42,0.82)';
+    ctx.fillRect(lp.x-tw2/2-4, lp.y-10, tw2+8, 14);
+    ctx.fillStyle = stateCol;
+    ctx.fillText(stateLabel, lp.x, lp.y);
   }
 
-  // Label
-  const labP = iso(pos.x, pos.y, -8);
-  ctx.font = '600 8px "DM Mono", monospace';
-  ctx.fillStyle = state === 'error' ? '#ef4444' : 'rgba(255,255,255,0.5)';
+  // Worker name always visible
+  const np = iso(drawX, drawY, drawZ + bob + 15.5);
+  ctx.font = `bold ${Math.round(8 * cam.zoom * 0.7)}px "DM Mono", monospace`;
   ctx.textAlign = 'center';
-  ctx.fillText(label, labP.x, labP.y);
-
-  // Status dot
-  const dotP = iso(pos.x + 14, pos.y - 10, 14);
-  ctx.beginPath();
-  ctx.arc(dotP.x, dotP.y, 3, 0, Math.PI * 2);
-  ctx.fillStyle = state === 'idle' ? 'rgba(255,255,255,0.2)' :
-                  state === 'working' ? '#22c55e' :
-                  state === 'error' ? '#ef4444' : '#fbbf24';
-  ctx.fill();
+  const nw = ctx.measureText(label).width;
+  ctx.fillStyle = 'rgba(15,23,42,0.7)';
+  ctx.fillRect(np.x-nw/2-3, np.y-9, nw+6, 13);
+  ctx.fillStyle = col;
+  ctx.fillText(label, np.x, np.y);
+  ctx.textAlign = 'left';
 }
 
 function drawParticles() {
