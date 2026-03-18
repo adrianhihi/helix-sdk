@@ -7,7 +7,15 @@
   "author": "LaoMOS",
   "license": "MIT",
   "homepage": "https://laomos.ai",
-  "keywords": ["agent", "self-repair", "pcec", "gene-map", "ai", "crypto", "helix"],
+  "keywords": [
+    "agent",
+    "self-repair",
+    "pcec",
+    "gene-map",
+    "ai",
+    "enterprise",
+    "helix"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/CarbonSiliconAI/helix-sdk"
@@ -24,6 +32,7 @@
   "dependencies": {
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
     "express": "^5.2.1"
   },
   "devDependencies": {

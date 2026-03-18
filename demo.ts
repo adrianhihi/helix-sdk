@@ -1,8 +1,7 @@
-import { wrap } from "./src/wrap";
+import "dotenv/config";
 import { GeneMap } from "./src/gene-map";
 import { PCEC } from "./src/pcec";
-import { CryptoDataScenario } from "./src/scenarios";
-import { LiveCryptoScenario } from "./src/scenarios/live-crypto";
+import { EnterpriseAgentScenario } from "./src/scenarios/enterprise-agent";
 
 // ── ANSI colors ──────────────────────────────────────────────
 const RED    = "\x1b[31m";
@@ -15,21 +14,44 @@ const RESET  = "\x1b[0m";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-function header(title: string): void {
-  const inner = `  ${title}  `;
-  const width = inner.length;
+// ── Operation descriptions (for display) ─────────────────────
+const OP_SUMMARY: Record<string, (data: Record<string, any>) => string> = {
+  ORDER_DISPATCH:   (d) => `${d.assignments} orders assigned`,
+  ETA_PREDICTION:   (d) => `${d.predictedETA} · ${d.confidence} conf`,
+  CUSTOMER_SUPPORT: (d) => `${d.resolution} · ${d.responseTime}`,
+  FRAUD_DETECTION:  (d) => `risk ${d.riskScore} · ${(d.flags?.length ?? 0)} flags`,
+  DEMAND_FORECAST:  (d) => `forecast ${d.forecast} · ${d.confidence}`,
+  DRIVER_INCENTIVE: (d) => `${d.driversIncentivized} drivers · ${d.totalBudget}`,
+};
+
+// ── Business impact estimator ────────────────────────────────
+const OP_COST: Record<string, number> = {
+  ORDER_DISPATCH:   2500,  // orders not assigned → lost revenue
+  ETA_PREDICTION:   800,   // bad ETAs → customer churn
+  CUSTOMER_SUPPORT: 1200,  // unresolved complaints → refunds
+  FRAUD_DETECTION:  3500,  // missed fraud → chargebacks
+  DEMAND_FORECAST:  1800,  // wrong staffing → overtime/lost orders
+  DRIVER_INCENTIVE: 600,   // wrong bonuses → driver attrition
+};
+
+function header(title: string, subtitle?: string): void {
+  const lines = [title];
+  if (subtitle) lines.push(subtitle);
+  const width = Math.max(...lines.map((l) => l.length)) + 4;
   console.log();
   console.log(`${TEAL}╭${"─".repeat(width)}╮${RESET}`);
-  console.log(`${TEAL}│${BOLD}${inner}${RESET}${TEAL}│${RESET}`);
+  for (const line of lines) {
+    console.log(`${TEAL}│${BOLD}  ${line.padEnd(width - 2)}${RESET}${TEAL}│${RESET}`);
+  }
   console.log(`${TEAL}╰${"─".repeat(width)}╯${RESET}`);
   console.log();
 }
 
-function iterLine(iter: number, source: string, delta: number, color: string): void {
+function iterLine(iter: number, op: string, detail: string, latency: number, color: string): void {
   const num = String(iter).padStart(2, " ");
-  const sign = delta >= 0 ? "+" : "";
-  const pct = `TVL \u0394 ${sign}${delta.toFixed(2)}%`;
-  console.log(`  ${color}✓ [iter ${num}]${RESET}  ${source.padEnd(16)} ${color}${pct}${RESET}`);
+  const opPad = op.padEnd(18);
+  const latStr = `${latency}ms`;
+  console.log(`  ${color}✓ [iter ${num}]${RESET}  ${opPad} ${color}${detail.padEnd(26)}${RESET} ${DIM}${latStr}${RESET}`);
 }
 
 function pcecLog(step: string, detail: string): void {
@@ -37,94 +59,99 @@ function pcecLog(step: string, detail: string): void {
 }
 
 // ── PART 1: Without Helix ────────────────────────────────────
-async function runWithoutHelix(): Promise<void> {
-  header("PART 1: Without Helix");
-  console.log(`  ${DIM}Task: monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min${RESET}\n`);
+async function runWithoutHelix(): Promise<{ completed: number; total: number }> {
+  header("PART 1: AI Ops Agent — No Helix", "Simulating: DoorDash-style platform");
+  console.log(`  ${DIM}Running 6 AI operations per cycle · real API calls when keys available${RESET}\n`);
 
-  const scenario = new CryptoDataScenario(40);
+  const scenario = new EnterpriseAgentScenario(20);
   let completed = 0;
 
   for (let i = 1; i <= scenario.totalIterations; i++) {
     try {
       const result = await scenario.agent(i);
-      iterLine(i, result.source, result.tvlDelta, GREEN);
+      const summary = OP_SUMMARY[result.operation]?.(result.data) ?? "ok";
+      iterLine(i, result.operation, summary, result.latencyMs, GREEN);
       completed++;
     } catch (err) {
       const error = err as Error;
-      console.log(`  ${RED}✗ [iter ${String(i).padStart(2, " ")}]  CRASH: ${error.message}${RESET}`);
+      const op = scenario["operations"][(i - 1) % 6]?.name ?? "UNKNOWN";
+      console.log(`  ${RED}✗ [iter ${String(i).padStart(2, " ")}]  ${op.padEnd(18)} CRASH: ${error.message}${RESET}`);
       console.log();
       console.log(`${RED}${BOLD}  Agent stopped at iteration ${i}. Required: human intervention.${RESET}`);
-      return;
+      return { completed, total: scenario.totalIterations };
     }
   }
 
   console.log(`\n  Completed: ${completed}/${scenario.totalIterations}`);
+  return { completed, total: scenario.totalIterations };
 }
 
 // ── PART 2: With Helix ───────────────────────────────────────
-async function runWithHelix(): Promise<void> {
-  header("PART 2: With Helix");
-  console.log(`  ${DIM}Task: monitor 12 DeFi protocol TVL changes \u00B7 polling every 5min${RESET}\n`);
+async function runWithHelix(): Promise<{ completed: number; total: number; repairs: number; costPrevented: number }> {
+  header("PART 2: AI Ops Agent + Helix SDK", "Same failures. Zero interventions.");
+  console.log(`  ${DIM}Running 6 AI operations per cycle · PCEC auto-repair active${RESET}\n`);
 
-  const scenario = new CryptoDataScenario(40);
-  const wrappedAgent = wrap(scenario.agent, { verbose: false });
+  const scenario = new EnterpriseAgentScenario(20);
+  const geneMap = new GeneMap();
+  const pcec = new PCEC(geneMap, false);
 
-  const FAILURE_ITERS = new Set([8, 15, 23, 31]);
   let completed = 0;
   let repairs = 0;
+  let costPrevented = 0;
 
   for (let i = 1; i <= scenario.totalIterations; i++) {
-    const isFailureIter = FAILURE_ITERS.has(i);
-
     try {
-      const result = await wrappedAgent(i);
-
-      if (isFailureIter) {
-        repairs++;
-        // Show PCEC steps for this repaired iteration
-        let errorType: string;
-        let strategies: string[];
-        let selected: string;
-        if (i === 8) {
-          errorType = "RATE_LIMIT";
-          strategies = ["backoff_retry", "rotate_api_key", "reduce_batch_size"];
-          selected = "backoff_retry";
-        } else if (i === 15) {
-          errorType = "HTTP_503";
-          strategies = ["switch_endpoint", "retry_with_delay", "use_cache"];
-          selected = "switch_endpoint";
-        } else if (i === 23) {
-          errorType = "TIMEOUT";
-          strategies = ["increase_timeout", "retry", "switch_endpoint"];
-          selected = "increase_timeout";
-        } else {
-          errorType = "AUTH_EXPIRED";
-          strategies = ["rotate_credentials", "refresh_token"];
-          selected = "rotate_credentials";
-        }
-        pcecLog("🔍 Perceive:", errorType);
-        pcecLog("🔧 Construct:", JSON.stringify(strategies));
-        pcecLog("⚖️  Evaluate:", selected);
-        pcecLog("✅ Commit:", "saved to gene map");
-        iterLine(i, result.source, result.tvlDelta, AMBER);
-      } else {
-        iterLine(i, result.source, result.tvlDelta, GREEN);
-      }
+      const result = await scenario.agent(i);
+      const summary = OP_SUMMARY[result.operation]?.(result.data) ?? "ok";
+      iterLine(i, result.operation, summary, result.latencyMs, GREEN);
       completed++;
     } catch (err) {
       const error = err as Error;
-      console.log(`  ${RED}✗ [iter ${String(i).padStart(2, " ")}]  FAIL: ${error.message}${RESET}`);
+      const op = scenario["operations"][(i - 1) % 6]?.name ?? "UNKNOWN";
+
+      // Show business impact
+      const cost = OP_COST[op] ?? 1000;
+      console.log(`\n  ${AMBER}⚠️  ${op} failed — ${error.message}${RESET}`);
+
+      // Run PCEC
+      const perceived = pcec.perceive(error);
+      const constructed = pcec.construct(perceived);
+      const evaluated = pcec.evaluate(constructed, error);
+
+      pcecLog("🔍 Perceive:", perceived);
+      pcecLog("🔧 Construct:", JSON.stringify(constructed));
+      pcecLog("⚖️  Evaluate:", `${evaluated} (no history · using default)`);
+
+      // Execute repair strategy
+      if (evaluated === "backoff_retry" || evaluated === "retry_with_delay" || evaluated === "retry") {
+        const backoffMs = 2000;
+        pcecLog("⏳", `backing off ${backoffMs}ms...`);
+        await sleep(backoffMs);
+      }
+
+      pcec.run("enterprise-agent", error);
+      pcecLog("✅ Commit:", "saved to gene map");
+
+      // Retry — should succeed since failure only fires once
+      try {
+        const retryResult = await scenario.agent(i);
+        const summary = OP_SUMMARY[retryResult.operation]?.(retryResult.data) ?? "ok";
+        console.log(`  ${TEAL}↺ [iter ${String(i).padStart(2, " ")}]${RESET}  ${op.padEnd(18)} ${TEAL}${summary.padEnd(26)}${RESET} ${DIM}${retryResult.latencyMs}ms${RESET}`);
+        completed++;
+        repairs++;
+        costPrevented += cost;
+      } catch (retryErr) {
+        console.log(`  ${RED}✗ [iter ${String(i).padStart(2, " ")}]  retry failed: ${(retryErr as Error).message}${RESET}`);
+      }
+      console.log();
     }
   }
 
-  // Final summary
-  const geneMap = new GeneMap();
+  // Final stats
   const stats = geneMap.getStats();
   geneMap.close();
 
-  console.log();
-  console.log(`  ${GREEN}${BOLD}${completed}/${scenario.totalIterations} iterations${RESET} ${DIM}\u00B7${RESET} ${TEAL}8 hours monitored${RESET} ${DIM}\u00B7${RESET} ${GREEN}0 human interventions${RESET} ${DIM}\u00B7${RESET} ${AMBER}${repairs} auto-repairs${RESET}`);
-  console.log(`  ${DIM}Gene Map: ${stats.totalRepairs} entries stored${RESET}`);
+  return { completed, total: scenario.totalIterations, repairs, costPrevented };
 }
 
 // ── Show Map ─────────────────────────────────────────────────
@@ -138,7 +165,6 @@ function showMap(): void {
     return;
   }
 
-  // Format timestamps: "2025-11-24T09:08:14.123Z" → "2025-11-24 09:08:14"
   const rows = repairs.map((r) => ({
     id: r.id,
     errorType: r.errorType,
@@ -146,14 +172,13 @@ function showMap(): void {
     timestamp: r.createdAt.replace("T", " ").replace(/\.\d+Z$/, ""),
   }));
 
-  // Dynamic column widths — min of header, max of data + padding
   const colW = {
     id:    Math.max(4,  ...rows.map((r) => r.id.length + 2)),
     err:   Math.max(14, ...rows.map((r) => r.errorType.length + 2)),
     strat: Math.max(15, ...rows.map((r) => r.strategy.length + 2)),
     ts:    21,
   };
-  const totalW = colW.id + colW.err + colW.strat + colW.ts + 3; // 3 inner separators
+  const totalW = colW.id + colW.err + colW.strat + colW.ts + 3;
 
   const pad = (s: string, w: number) => " " + s.padEnd(w - 1);
   const padR = (s: string, w: number) => s.padStart(w - 1) + " ";
@@ -182,71 +207,26 @@ function showMap(): void {
   console.log();
 }
 
-// ── Live Mode ────────────────────────────────────────────────
-async function runLive(): Promise<void> {
-  console.log(`\n${AMBER}${BOLD}  ⚡ LIVE MODE — real CoinGecko API calls${RESET}`);
-  console.log(`${DIM}  Rate limits will trigger real PCEC repairs${RESET}\n`);
-
-  const scenario = new LiveCryptoScenario(30);
-  const geneMap = new GeneMap();
-  const pcec = new PCEC(geneMap, false);
-  const wrappedAgent = wrap(scenario.agent, { verbose: false });
-
-  let completed = 0;
-  let repairs = 0;
-  let errors = 0;
-
-  for (let i = 1; i <= scenario.totalIterations; i++) {
-    try {
-      const result = await wrappedAgent(i);
-      const priceStr = Object.entries(result.prices)
-        .map(([k, v]) => `${k}=$${v}`)
-        .join("  ");
-      const num = String(i).padStart(2, " ");
-      console.log(`  ${GREEN}✓ [iter ${num}]${RESET}  ${result.source.padEnd(12)} HTTP ${result.httpStatus}  ${DIM}${priceStr}${RESET}`);
-      completed++;
-    } catch (err) {
-      const error = err as Error;
-      const errorType = pcec.perceive(error);
-      const strategies = pcec.construct(errorType);
-      const strategy = pcec.evaluate(strategies, error);
-      pcec.run("live-agent", error);
-
-      const num = String(i).padStart(2, " ");
-      console.log(`  ${AMBER}↺ [iter ${num}]${RESET}  ${error.message}`);
-      console.log(`      ${DIM}🔍 ${errorType} → 🔧 ${strategy} → ✅ saved${RESET}`);
-      repairs++;
-
-      // Retry with exponential backoff
-      await sleep(5000);
-      try {
-        const retryResult = await scenario.agent(i);
-        const priceStr = Object.entries(retryResult.prices)
-          .map(([k, v]) => `${k}=$${v}`)
-          .join("  ");
-        console.log(`  ${TEAL}✓ [iter ${num}]${RESET}  retry ok     HTTP ${retryResult.httpStatus}  ${DIM}${priceStr}${RESET}`);
-        completed++;
-      } catch (retryErr) {
-        console.log(`  ${RED}✗ [iter ${num}]${RESET}  retry failed: ${(retryErr as Error).message}`);
-        errors++;
-      }
-    }
-    await sleep(3000);
-  }
-
-  // Summary
-  const stats = geneMap.getStats();
-  geneMap.close();
-
+// ── Summary Box ──────────────────────────────────────────────
+function printSummary(
+  p1: { completed: number; total: number },
+  p2: { completed: number; total: number; repairs: number; costPrevented: number }
+): void {
+  const w = 50;
   console.log();
-  console.log(`${TEAL}╭──────────────────────────────────────────╮${RESET}`);
-  console.log(`${TEAL}│${BOLD}  Live Mode Summary                      ${RESET}${TEAL}│${RESET}`);
-  console.log(`${TEAL}├──────────────────────────────────────────┤${RESET}`);
-  console.log(`${TEAL}│${RESET}  Iterations completed  ${GREEN}${BOLD}${String(completed).padStart(3)}${RESET} / ${scenario.totalIterations}         ${TEAL}│${RESET}`);
-  console.log(`${TEAL}│${RESET}  Auto-repairs          ${AMBER}${BOLD}${String(repairs).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
-  console.log(`${TEAL}│${RESET}  Failed after retry    ${RED}${BOLD}${String(errors).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
-  console.log(`${TEAL}│${RESET}  Gene Map entries      ${TEAL}${BOLD}${String(stats.totalRepairs).padStart(3)}${RESET}              ${TEAL}│${RESET}`);
-  console.log(`${TEAL}╰──────────────────────────────────────────╯${RESET}`);
+  console.log(`${TEAL}╭${"─".repeat(w)}╮${RESET}`);
+  console.log(`${TEAL}│${BOLD}  Summary${RESET}${" ".repeat(w - 9)}${TEAL}│${RESET}`);
+  console.log(`${TEAL}├${"─".repeat(w)}┤${RESET}`);
+  console.log(`${TEAL}│${RESET}  Operations completed    ${RED}${BOLD}${String(p1.completed).padStart(2)}${RESET} / ${p1.total}${" ".repeat(w - 34)}${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Human interventions      ${RED}${BOLD}1${RESET}   (without Helix)${" ".repeat(w - 44)}${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Auto-repairs             ${DIM}0${RESET}   (without Helix)${" ".repeat(w - 44)}${TEAL}│${RESET}`);
+  console.log(`${TEAL}├${"─".repeat(w)}┤${RESET}`);
+  console.log(`${TEAL}│${RESET}  Operations completed    ${GREEN}${BOLD}${String(p2.completed).padStart(2)}${RESET} / ${p2.total}${" ".repeat(w - 34)}${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Human interventions      ${GREEN}${BOLD}0${RESET}   (with Helix)${" ".repeat(w - 41)}${TEAL}│${RESET}`);
+  console.log(`${TEAL}│${RESET}  Auto-repairs             ${AMBER}${BOLD}${p2.repairs}${RESET}   (with Helix)${" ".repeat(w - 41)}${TEAL}│${RESET}`);
+  const costStr = `~$${p2.costPrevented.toLocaleString()} est.`;
+  console.log(`${TEAL}│${RESET}  ${AMBER}Business impact saved:  ${costStr}${RESET}${" ".repeat(Math.max(0, w - 26 - costStr.length))}${TEAL}│${RESET}`);
+  console.log(`${TEAL}╰${"─".repeat(w)}╯${RESET}`);
 }
 
 // ── Main ─────────────────────────────────────────────────────
@@ -257,16 +237,13 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n${DIM}helix v0.1.0 — github.com/CarbonSiliconAI/helix-sdk${RESET}`);
-  console.log(`${BOLD}${TEAL}@helix/sdk${RESET} ${DIM}— self-repairing agent demo${RESET}`);
+  console.log(`${BOLD}${TEAL}@helix/sdk${RESET} ${DIM}— enterprise AI ops demo${RESET}`);
 
-  if (process.argv.includes("--live")) {
-    await runLive();
-  } else {
-    await runWithoutHelix();
-    await sleep(500);
-    await runWithHelix();
-  }
+  const p1 = await runWithoutHelix();
+  await sleep(500);
+  const p2 = await runWithHelix();
 
+  printSummary(p1, p2);
   console.log();
 }
 
