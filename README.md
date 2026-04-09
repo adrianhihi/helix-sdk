@@ -1,4 +1,4 @@
-# 🧬 Helix
+# 🧬 Helix 
 
 **Two lines of code. Your agent never halts again.**
 
@@ -12,7 +12,7 @@ auth expiry, schema changes — Helix's PCEC engine
 automatically detects, repairs, and continues.
 Zero human intervention.
 
-Part of the [LaoMOS](https://laomos.ai) ecosystem.
+Part of the [Helix](https://github.com/adrianhihi/helix) ecosystem.
 
 ---
 
